@@ -73,7 +73,6 @@ jobs:
             --trace-children=yes \
             --fair-sched=yes \
             --child-silent-after-fork=no \
-            --time-unit=instructions \
             --max-stackframe=4194304 \
             --main-stacksize=16777216 \
             --redo-last-malloc=no \
