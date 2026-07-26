@@ -10,6 +10,17 @@ finish-args:
   - --share=network
   - --device=dri
 modules:
+  - name: gamemode
+    buildsystem: meson
+    config-opts:
+      - -Dwith-sd-bus-provider=no-daemon
+      - -Dwith-util=false
+      - -Dwith-examples=false
+      - -Dwith-pam-renicing=false
+    sources:
+      - type: archive
+        url: https://github.com/FeralInteractive/gamemode/archive/refs/tags/1.8.2.tar.gz
+        sha256: 2886d4ce543c78bd2a364316d5e7fd59ef06b71de63f896b37c6d3dc97658f60
   - name: cmark
     buildsystem: cmake-ninja
     builddir: true

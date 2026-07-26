@@ -28,11 +28,13 @@ parts:
       - libtomlplusplus-dev
       - libgl1-mesa-dev
       - libglvnd-dev
+      - gamemode-dev
     stage-packages:
       - libqt6core6
       - libqt6gui6
       - libqt6widgets6
       - libqt6networkauth6
+      - libgamemode0
 
 apps:
   launcher:

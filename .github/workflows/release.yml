@@ -66,8 +66,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: "true"
           path: "Launcher-source"
+
+      - name: Init submodules
+        run: |
+          git -C Launcher-source submodule update --init --recursive
 
       - name: Configure git user
         run: |
