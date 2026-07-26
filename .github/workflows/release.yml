@@ -94,34 +94,34 @@ jobs:
           find artifacts/ -type f 2>/dev/null | head -50
 
           # Linux AppImage (x86_64 and aarch64)
-          find artifacts/ -name "*.AppImage" -not -name "*.zsync" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
-          find artifacts/ -name "*.AppImage.zsync" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.AppImage" -not -name "*.zsync" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.AppImage.zsync" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
 
           # Linux Portable tarballs
-          find artifacts/ -name "*.tar.gz" -path "*/Portable*" -exec sh -c 'cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-Linux-Portable-'"$RELEASE_VERSION"'.tar.gz"' _ {} \;
+          find artifacts/ -type f -name "*.tar.gz" -path "*/Portable*" -exec sh -c 'cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-Linux-Portable-'"$RELEASE_VERSION"'.tar.gz"' _ {} \;
 
           # .deb packages
-          find artifacts/ -name "*.deb" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.deb" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
 
           # .rpm packages
-          find artifacts/ -name "*.rpm" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.rpm" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
 
           # Snap
-          find artifacts/ -name "*.snap" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.snap" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
 
           # Flatpak
-          find artifacts/ -name "*.flatpak" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
+          find artifacts/ -type f -name "*.flatpak" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \;
 
           # macOS DMG
-          find artifacts/ -name "*.dmg" -exec sh -c '
+          find artifacts/ -type f -name "*.dmg" -exec sh -c '
             cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-macOS-'"$RELEASE_VERSION"'.dmg"' _ {} \;
 
           # macOS ZIP
-          find artifacts/ -name "*.zip" -path "*/macOS*" -exec sh -c '
+          find artifacts/ -type f -name "*.zip" -path "*/macOS*" -exec sh -c '
             cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-macOS-'"$RELEASE_VERSION"'.zip"' _ {} \;
 
           # Windows NSIS Installer
-          find artifacts/ -name "Launcher-Setup.exe" -exec sh -c '
+          find artifacts/ -type f -name "Launcher-Setup.exe" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -134,7 +134,7 @@ jobs:
           ' _ {} \;
 
           # Windows Portable ZIP
-          find artifacts/ -name "Launcher-portable.zip" -exec sh -c '
+          find artifacts/ -type f -name "Launcher-portable.zip" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -180,7 +180,7 @@ jobs:
           rm -rf "$METADATA_TEMP_DIR"
 
           # Windows MSIX bundles
-          find artifacts/ -name "*.msixbundle" -exec sh -c '
+          find artifacts/ -type f -name "*.msixbundle" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -193,7 +193,7 @@ jobs:
           ' _ {} \; 2>/dev/null || true
 
           # Windows MSIX packages
-          find artifacts/ -name "*.msix" -not -name "*.msixbundle" -exec sh -c '
+          find artifacts/ -type f -name "*.msix" -not -name "*.msixbundle" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -206,7 +206,7 @@ jobs:
           ' _ {} \; 2>/dev/null || true
 
           # Windows APPX bundles
-          find artifacts/ -name "*.appxbundle" -exec sh -c '
+          find artifacts/ -type f -name "*.appxbundle" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -219,7 +219,7 @@ jobs:
           ' _ {} \; 2>/dev/null || true
 
           # Windows APPX packages
-          find artifacts/ -name "*.appx" -not -name "*.appxbundle" -exec sh -c '
+          find artifacts/ -type f -name "*.appx" -not -name "*.appxbundle" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -232,7 +232,7 @@ jobs:
           ' _ {} \; 2>/dev/null || true
 
           # Windows MSI installers
-          find artifacts/ -name "*.msi" -exec sh -c '
+          find artifacts/ -type f -name "*.msi" -exec sh -c '
             file_directory=$(dirname "$1")
             directory_name=$(basename "$file_directory")
             if echo "$directory_name" | grep -q "MinGW-w64"; then
@@ -245,21 +245,21 @@ jobs:
           ' _ {} \; 2>/dev/null || true
 
           # Linux .pkg.tar.zst (Arch Linux)
-          find artifacts/ -name "*.pkg.tar.zst" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \; 2>/dev/null || true
+          find artifacts/ -type f -name "*.pkg.tar.zst" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \; 2>/dev/null || true
 
           # Linux .pkg.tar.xz (Arch Linux)
-          find artifacts/ -name "*.pkg.tar.xz" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \; 2>/dev/null || true
+          find artifacts/ -type f -name "*.pkg.tar.xz" -exec cp {} "$RELEASE_OUTPUT_DIRECTORY/" \; 2>/dev/null || true
 
           # Linux portable tar.xz
-          find artifacts/ -name "*.tar.xz" -path "*/Portable*" -exec sh -c '
+          find artifacts/ -type f -name "*.tar.xz" -path "*/Portable*" -exec sh -c '
             cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-Linux-Portable-'"$RELEASE_VERSION"'.tar.xz"' _ {} \; 2>/dev/null || true
 
           # Linux portable tar.bz2
-          find artifacts/ -name "*.tar.bz2" -path "*/Portable*" -exec sh -c '
+          find artifacts/ -type f -name "*.tar.bz2" -path "*/Portable*" -exec sh -c '
             cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-Linux-Portable-'"$RELEASE_VERSION"'.tar.bz2"' _ {} \; 2>/dev/null || true
 
           # Linux portable tar.zst
-          find artifacts/ -name "*.tar.zst" -path "*/Portable*" -exec sh -c '
+          find artifacts/ -type f -name "*.tar.zst" -path "*/Portable*" -exec sh -c '
             cp "$1" "'"$RELEASE_OUTPUT_DIRECTORY"'/Launcher-Linux-Portable-'"$RELEASE_VERSION"'.tar.zst"' _ {} \; 2>/dev/null || true
 
           # Generate checksums for all release files

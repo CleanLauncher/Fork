@@ -1,6 +1,6 @@
 name: cleanlauncher
 base: core24
-version: '111.0.3'
+  version: '111.0.4'
 summary: CleanLauncher
 description: |
   CleanLauncher is a C++/Rust launcher application.
@@ -20,6 +20,7 @@ parts:
       - pkg-config
       - scdoc
       - libcmark-dev
+      - cmark
       - libarchive-dev
       - libqrencode-dev
       - zlib1g-dev

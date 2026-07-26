@@ -62,6 +62,10 @@ enum class ResourceProvider : std::uint8_t
     FLAME
 };
 
+#ifdef OPTIONAL
+#undef OPTIONAL
+#endif
+
 enum class DependencyType : std::uint8_t
 {
     REQUIRED,
