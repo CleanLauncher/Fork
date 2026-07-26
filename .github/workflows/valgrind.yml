@@ -77,7 +77,6 @@ jobs:
             --show-reachable=yes \
             --show-mismatched-frees=yes \
             --expensive-definedness-checks=yes \
-            --history-level=full \
             --sim-hints=no-nptl-pthread-stackcache \
             --freelist-vol=10000000 \
             --alignment=16 \

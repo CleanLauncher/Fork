@@ -12,6 +12,7 @@ finish-args:
 modules:
   - name: cmark
     buildsystem: cmake-ninja
+    builddir: true
     config-opts:
       - -DCMARK_TESTS=OFF
       - -DCMARK_SHARED=ON
