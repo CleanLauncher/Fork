@@ -20,7 +20,7 @@ modules:
     sources:
       - type: archive
         url: https://github.com/FeralInteractive/gamemode/archive/refs/tags/1.8.2.tar.gz
-        sha256: 2886d4ce543c78bd2a364316d5e7fd59ef06b71de63f896b37c6d3dc97658f60
+        sha256: 2b4a20894822caf04767af6a1601130d6b718fc30b8a77895607341b1674740f
   - name: cmark
     buildsystem: cmake-ninja
     builddir: true

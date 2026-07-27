@@ -66,11 +66,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          path: "Launcher-source"
-
-      - name: Init submodules
-        run: |
-          git -C Launcher-source submodule update --init --recursive
+          submodules: recursive
 
       - name: Configure git user
         run: |
@@ -151,33 +147,33 @@ jobs:
 
           # Source tarball
           cd "${{ github.workspace }}"
-          tar --exclude='.git' -czf "$RELEASE_OUTPUT_DIRECTORY/Launcher-$RELEASE_VERSION.tar.gz" Launcher-source
+          tar --exclude='.git' -czf "$RELEASE_OUTPUT_DIRECTORY/Launcher-$RELEASE_VERSION.tar.gz" .
 
           # Metadata archive (nix, flatpak, snap, resources)
           METADATA_TEMP_DIR=$(mktemp -d)
-          if [ -f "Launcher-source/nix/launcher.nix" ]; then
+          if [ -f "nix/launcher.nix" ]; then
             mkdir -p "$METADATA_TEMP_DIR/nix"
-            cp Launcher-source/nix/launcher.nix "$METADATA_TEMP_DIR/nix/"
+            cp nix/launcher.nix "$METADATA_TEMP_DIR/nix/"
           fi
-          if [ -d "Launcher-source/nix" ]; then
+          if [ -d "nix" ]; then
             mkdir -p "$METADATA_TEMP_DIR/nix"
-            cp -r Launcher-source/nix/* "$METADATA_TEMP_DIR/nix/" 2>/dev/null || true
+            cp -r nix/* "$METADATA_TEMP_DIR/nix/" 2>/dev/null || true
           fi
-          if [ -d "Launcher-source/res" ]; then
+          if [ -d "res" ]; then
             mkdir -p "$METADATA_TEMP_DIR/res"
-            cp -r Launcher-source/res/* "$METADATA_TEMP_DIR/res/" 2>/dev/null || true
+            cp -r res/* "$METADATA_TEMP_DIR/res/" 2>/dev/null || true
           fi
-          if [ -f "Launcher-source/flatpak/com.cleanlauncher.Launcher.yml" ]; then
+          if [ -f "flatpak/com.cleanlauncher.Launcher.yml" ]; then
             mkdir -p "$METADATA_TEMP_DIR/flatpak"
-            cp Launcher-source/flatpak/com.cleanlauncher.Launcher.yml "$METADATA_TEMP_DIR/flatpak/"
+            cp flatpak/com.cleanlauncher.Launcher.yml "$METADATA_TEMP_DIR/flatpak/"
           fi
-          if [ -f "Launcher-source/snap/snapcraft.yaml" ]; then
+          if [ -f "snap/snapcraft.yaml" ]; then
             mkdir -p "$METADATA_TEMP_DIR/snap"
-            cp Launcher-source/snap/snapcraft.yaml "$METADATA_TEMP_DIR/snap/"
+            cp snap/snapcraft.yaml "$METADATA_TEMP_DIR/snap/"
           fi
-          if [ -f "Launcher-source/.changelog/$RELEASE_VERSION.md" ]; then
+          if [ -f ".changelog/$RELEASE_VERSION.md" ]; then
             mkdir -p "$METADATA_TEMP_DIR/changelog"
-            cp Launcher-source/.changelog/$RELEASE_VERSION.md "$METADATA_TEMP_DIR/changelog/"
+            cp .changelog/$RELEASE_VERSION.md "$METADATA_TEMP_DIR/changelog/"
           fi
           tar -czf "$RELEASE_OUTPUT_DIRECTORY/Launcher-$RELEASE_VERSION-metadata.tar.gz" -C "$METADATA_TEMP_DIR" .
           rm -rf "$METADATA_TEMP_DIR"
@@ -283,7 +279,7 @@ jobs:
         run: |
           RELEASE_OUTPUT_DIRECTORY="release-files"
           RELEASE_VERSION="${{ env.RELEASE_VERSION }}"
-          CHANGELOG_FILE_PATH="Launcher-source/.changelog/${RELEASE_VERSION}.md"
+          CHANGELOG_FILE_PATH=".changelog/${RELEASE_VERSION}.md"
           RELEASE_ASSETS=""
 
           for release_file in "$RELEASE_OUTPUT_DIRECTORY"/*; do

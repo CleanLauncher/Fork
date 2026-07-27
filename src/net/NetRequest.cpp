@@ -113,7 +113,7 @@ void NetRequest::executeTask()
         header_proxy->writeHeaders(request);
     }
 
-    if (!request.headers().contains("x-api-key")) {
+    if (!request.hasRawHeader("x-api-key")) {
         request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
     }
 
