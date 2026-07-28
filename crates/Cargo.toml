@@ -12,8 +12,8 @@ members = [
     "mod_metadata",
     "settings",
     "string_utils",
-    "core"
-]
+    "core", "auth"
+, "auth"]
 [profile.release]
 opt-level = 3
 lto = true
