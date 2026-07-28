@@ -1,3 +1,6 @@
 [submodule "libraries/libnbtplusplus"]
 	path = libraries/libnbtplusplus
 	url = https://github.com/PrismLauncher/libnbtplusplus.git
+[submodule "website"]
+	path = website
+	url = https://github.com/CleanLauncher/website.git
