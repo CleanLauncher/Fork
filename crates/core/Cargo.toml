@@ -25,3 +25,5 @@ cxx = "1.0.198"
 
 [build-dependencies]
 cxx-build = "1.0.198"
+process_launcher = { path = "../process_launcher" }
+download_manager = { path = "../download_manager" }
