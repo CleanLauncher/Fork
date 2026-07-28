@@ -1,8 +1,12 @@
-# Launcher
+# CleanLauncher
 
-Launcher is a clean and maintained Minecraft launcher, forked from PrismLauncher.
+CleanLauncher is a custom Minecraft launcher written in C++ and Rust.
 
-No emojis, symbols, or special characters in commit messages, code, documentation, or UI text. ASCII only.
+## Documentation
+
+* [Development Rules](docs/DEV.md)
+* [Agent Rules](docs/AGENTS.md)
+* [Rust Roadmap](docs/ROADMAP_RUST.md)
 
 ## Building
 
