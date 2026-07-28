@@ -94,67 +94,12 @@ if (UNIX AND NOT CYGWIN AND NOT APPLE)
 endif()
 
 set(NET_SOURCES
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
-    net/DummySink.h
-    net/FileSink.cpp
-    net/FileSink.h
-    net/HttpMetaCache.cpp
-    net/HttpMetaCache.h
-    net/MetaCacheSink.cpp
-    net/MetaCacheSink.h
-    net/Logging.h
-    net/Logging.cpp
-    net/NetJob.cpp
-    net/NetJob.h
-    net/NetUtils.h
-    net/PasteUpload.cpp
-    net/PasteUpload.h
-    net/Sink.h
-    net/Validator.h
-    net/Upload.cpp
-    net/Upload.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
-    net/ApiHeaderProxy.h
-    net/ApiDownload.h
-    net/ApiDownload.cpp
-    net/ApiUpload.cpp
-    net/ApiUpload.h
-    net/NetRequest.cpp
-    net/NetRequest.h
 
     NetworkCheck.cpp
     NetworkCheck.h
-    net/flame/FetchFlameAPIKey.cpp
-    net/flame/FetchFlameAPIKey.h
 )
 
 set(LAUNCH_SOURCES
-    launch/steps/CheckJava.cpp
-    launch/steps/CheckJava.h
-    launch/steps/LookupServerAddress.cpp
-    launch/steps/LookupServerAddress.h
-    launch/steps/PostLaunchCommand.cpp
-    launch/steps/PostLaunchCommand.h
-    launch/steps/PreLaunchCommand.cpp
-    launch/steps/PreLaunchCommand.h
-    launch/steps/TextPrint.cpp
-    launch/steps/TextPrint.h
-    launch/steps/QuitAfterGameStop.cpp
-    launch/steps/QuitAfterGameStop.h
-    launch/steps/PrintServers.cpp
-    launch/steps/PrintServers.h
-    launch/LaunchStep.cpp
-    launch/LaunchStep.h
-    launch/LaunchTask.cpp
-    launch/LaunchTask.h
-    launch/LogModel.cpp
-    launch/LogModel.h
-    launch/TaskStepWrapper.cpp
-    launch/TaskStepWrapper.h
     logs/LogParser.cpp
     logs/LogParser.h
 )
@@ -241,32 +186,6 @@ set(MINECRAFT_SOURCES
     minecraft/update/LibrariesTask.cpp
     minecraft/update/LibrariesTask.h
 
-    minecraft/launch/ClaimAccount.cpp
-    minecraft/launch/ClaimAccount.h
-    minecraft/launch/CreateGameFolders.cpp
-    minecraft/launch/CreateGameFolders.h
-    minecraft/launch/EnsureAvailableMemory.cpp
-    minecraft/launch/EnsureAvailableMemory.h
-    minecraft/launch/EnsureOfflineLibraries.cpp
-    minecraft/launch/EnsureOfflineLibraries.h
-    minecraft/launch/ModMinecraftJar.cpp
-    minecraft/launch/ModMinecraftJar.h
-    minecraft/launch/ExtractNatives.cpp
-    minecraft/launch/ExtractNatives.h
-    minecraft/launch/LauncherPartLaunch.cpp
-    minecraft/launch/LauncherPartLaunch.h
-    minecraft/launch/MinecraftTarget.cpp
-    minecraft/launch/MinecraftTarget.h
-    minecraft/launch/PrintInstanceInfo.cpp
-    minecraft/launch/PrintInstanceInfo.h
-    minecraft/launch/ReconstructAssets.cpp
-    minecraft/launch/ReconstructAssets.h
-    minecraft/launch/ScanModFolders.cpp
-    minecraft/launch/ScanModFolders.h
-    minecraft/launch/VerifyJavaInstall.cpp
-    minecraft/launch/VerifyJavaInstall.h
-    minecraft/launch/AutoInstallJava.cpp
-    minecraft/launch/AutoInstallJava.h
 
     minecraft/GradleSpecifier.h
     minecraft/MinecraftInstance.cpp
@@ -615,25 +534,6 @@ set(LAUNCHER_UPDATER_SOURCES
     MMCTime.h
     MMCTime.cpp
 
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
-    net/FileSink.cpp
-    net/FileSink.h
-    net/HttpMetaCache.cpp
-    net/HttpMetaCache.h
-    net/Logging.h
-    net/Logging.cpp
-    net/NetRequest.cpp
-    net/NetRequest.h
-    net/NetJob.cpp
-    net/NetJob.h
-    net/NetUtils.h
-    net/Sink.h
-    net/Validator.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
 
     ui/dialogs/ProgressDialog.cpp
     ui/dialogs/ProgressDialog.h

@@ -1,3 +1,1 @@
-libraries/nbtplusplus
-crates/target
-.mimocode
+buildconfig/.markdownlintignore
