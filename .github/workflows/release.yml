@@ -49,8 +49,8 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       - name: Build Flatpak
         run: |
-          flatpak-builder --user --disable-rofiles-fuse --install-deps-from=flathub --force-clean build-dir flatpak/com.cleanlauncher.Launcher.yml
-          flatpak build-bundle build-dir Launcher.flatpak com.cleanlauncher.Launcher
+          flatpak-builder --user --disable-rofiles-fuse --install-deps-from=flathub --force-clean --repo=build-repo build-dir flatpak/com.cleanlauncher.Launcher.yml
+          flatpak build-bundle build-repo Launcher.flatpak com.cleanlauncher.Launcher
       - uses: actions/upload-artifact@v7
         with:
           name: flatpak

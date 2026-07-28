@@ -41,5 +41,5 @@ parts:
 
 apps:
   launcher:
-    command: bin/launcher
+    command: usr/bin/launcher
     extensions: [kde-neon]

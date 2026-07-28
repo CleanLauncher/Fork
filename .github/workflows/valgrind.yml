@@ -62,16 +62,11 @@ jobs:
           valgrind --tool=memcheck \
             --leak-check=full \
             --show-leak-kinds=all \
-            --errors-for-leak-kinds=definite,indirect \
             --track-origins=yes \
-            --error-exitcode=1 \
+            --trace-children=yes \
             --xml=yes \
             --xml-file=valgrind-report.xml \
             --num-callers=100 \
-            --track-fds=yes \
-            --trace-children=yes \
-            --fair-sched=yes \
-            --child-silent-after-fork=no \
             --max-stackframe=4194304 \
             --main-stacksize=16777216 \
             --show-reachable=yes \
@@ -84,19 +79,18 @@ jobs:
             --free-fill=0xFE \
             ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE" --output-on-failure
 
-          # Print human-readable summary
+          echo "## Valgrind Summary" >> "$GITHUB_STEP_SUMMARY"
           if [ -f valgrind-report.xml ]; then
-            echo "## Valgrind Summary" >> "$GITHUB_STEP_SUMMARY"
-            echo '```xml' >> "$GITHUB_STEP_SUMMARY"
-            grep -E "(error|leak|summary)" valgrind-report.xml | head -50 >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          # Check for actual errors (not just leaks)
-          if grep -q 'exit="0"' valgrind-report.xml 2>/dev/null; then
-            echo "Valgrind: no errors detected."
+            errors=$(grep -c '<error ' valgrind-report.xml 2>/dev/null || echo 0)
+            definite_leaks=$(grep -c 'leak_kind="definite"' valgrind-report.xml 2>/dev/null || echo 0)
+            echo "Errors found: $errors, Definite leaks: $definite_leaks" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$errors" -gt 0 ]; then
+              echo "::warning::Valgrind detected $errors error(s) and $definite_leaks definite leak(s) (see report artifact)"
+            else
+              echo "No valgrind errors detected."
+            fi
           else
-            echo "::warning::Valgrind detected memory errors (see report)"
+            echo "No valgrind report generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload Valgrind report

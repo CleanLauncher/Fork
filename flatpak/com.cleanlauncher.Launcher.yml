@@ -71,12 +71,12 @@ modules:
         sha256: 5385bc1b8c2f20f3b91d258bf8ccc8cf62023935df2d2676b5b67049f31a049c
   - name: launcher
     buildsystem: cmake-ninja
-    env:
-      JAVA_HOME: /app/jdk/jdk
     config-opts:
       - -DCMAKE_JAVA_COMPILER=/app/jdk/jdk/bin/javac
     build-options:
       append-path: /app/jdk/jdk/bin
+      env:
+        JAVA_HOME: /app/jdk/jdk
     sources:
       - type: dir
         path: ..
