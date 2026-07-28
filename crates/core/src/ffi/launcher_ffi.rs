@@ -1,6 +1,6 @@
 use process_launcher::ProcessLauncher;
-use std::os::raw::c_char;
 use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 
 #[no_mangle]
 pub extern "C" fn launch_instance(instance_path: *const c_char) -> i32 {
@@ -12,7 +12,7 @@ pub extern "C" fn launch_instance(instance_path: *const c_char) -> i32 {
         Ok(s) => s,
         Err(_) => return -1,
     };
-    
+
     // Simulating launcher FFI call
     log::info!("Launching instance from FFI at {}", path);
     0

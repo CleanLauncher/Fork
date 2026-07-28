@@ -1,4 +1,4 @@
-use crate::models::{DownloadTask, DownloadStatus};
+use crate::models::{DownloadStatus, DownloadTask};
 use reqwest::Client;
 use std::fs::File;
 use std::io::Write;
@@ -19,7 +19,9 @@ impl Downloader {
     }
 
     pub async fn download(&self, task: &DownloadTask) -> Result<(), String> {
-        let response = self.client.get(&task.url)
+        let response = self
+            .client
+            .get(&task.url)
             .send()
             .await
             .map_err(|e| format!("HTTP request failed: {}", e))?;
@@ -33,8 +35,7 @@ impl Downloader {
             std::fs::create_dir_all(parent).map_err(|e| format!("Failed to create directory: {}", e))?;
         }
 
-        let mut file = File::create(&task.destination)
-            .map_err(|e| format!("Failed to create file: {}", e))?;
+        let mut file = File::create(&task.destination).map_err(|e| format!("Failed to create file: {}", e))?;
 
         let bytes = response.bytes().await.map_err(|e| format!("Failed to read bytes: {}", e))?;
         file.write_all(&bytes).map_err(|e| format!("Failed to write to file: {}", e))?;

@@ -24,9 +24,9 @@ pub struct InstanceConfig {
 pub fn create_instance(base_path: &Path, name: &str, config: InstanceConfig) -> Result<(), std::io::Error> {
     let instance_dir = base_path.join(name);
     fs::create_dir_all(&instance_dir)?;
-    
+
     let config_path = instance_dir.join("instance.cfg");
-    
+
     let type_str = match config.instance_type {
         InstanceType::Vanilla => "Vanilla",
         InstanceType::FTB => "FTB",
@@ -39,14 +39,14 @@ pub fn create_instance(base_path: &Path, name: &str, config: InstanceConfig) -> 
         InstanceType::Modrinth => "Modrinth",
         InstanceType::ATLauncher => "ATLauncher",
     };
-    
+
     let key = match config.instance_type {
         InstanceType::Vanilla | InstanceType::Forge | InstanceType::Fabric | InstanceType::Quilt | InstanceType::LiteLoader => "Version",
         _ => "Modpack",
     };
-    
+
     let config_content = format!("InstanceType={}\n{}={}\n", type_str, key, config.version_or_modpack);
     fs::write(config_path, config_content)?;
-    
+
     Ok(())
 }
