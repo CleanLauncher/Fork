@@ -12,7 +12,7 @@ app:
 version:
   major: 111
   minor: 0
-  patch: 5
+  patch: 6
 
 urls:
   news_rss: https://prismlauncher.org/feed/feed.xml

@@ -1,0 +1,114 @@
+# Valgrind suppressions for known false positives from Qt and system libraries
+# These are one-time global allocations cleaned up at process exit
+
+# Qt QCoreApplication and QTEST_GUILESS_MAIN initialization
+# Leaks originating from Qt core library during startup
+{
+   Qt-core-init-leaks
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libQt6Core.so*
+}
+{
+   Qt-core-init-reachable
+   Memcheck:Leak
+   match-leak-kinds: still-reachable
+   ...
+   lib:libQt6Core.so*
+}
+
+# Qt GUI/Widgets library initialization
+{
+   Qt-gui-init-leaks
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libQt6Gui.so*
+}
+
+# Qt XML parsing library
+{
+   Qt-xml-init-leaks
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libQt6Xml.so*
+}
+
+# Qt Network library
+{
+   Qt-network-init-leaks
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libQt6Network.so*
+}
+
+# Qt Test framework internal allocations
+{
+   Qt-test-internal
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libQt6Test.so*
+}
+
+# GLib main loop, thread system, and memory allocator
+{
+   GLib-allocations
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libglib-2.0.so*
+}
+{
+   GLib-gthread
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libgthread-2.0.so*
+}
+
+# OpenSSL global initialization
+{
+   OpenSSL-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libssl.so*
+}
+{
+   OpenSSL-crypto-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libcrypto.so*
+}
+
+# X11 display and input handling
+{
+   X11-allocations
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libX11.so*
+}
+
+# CTest process internal allocations
+{
+   ctest-internal
+   Memcheck:Leak
+   match-leak-kinds: still-reachable
+   ...
+   obj:/usr/local/bin/ctest
+}
+
+# libc internal allocations (thread-local storage, etc.)
+{
+   libc-internal
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   lib:libc.so*
+}

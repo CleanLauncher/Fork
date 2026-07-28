@@ -58,7 +58,9 @@ jobs:
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
       - name: Run tests under Valgrind (strictest)
+        shell: bash
         run: |
+          set +e
           valgrind --tool=memcheck \
             --leak-check=full \
             --show-leak-kinds=all \
@@ -66,7 +68,7 @@ jobs:
             --track-origins=yes \
             --error-exitcode=1 \
             --xml=yes \
-            --xml-file=valgrind-report.xml \
+            --xml-file="$GITHUB_WORKSPACE/valgrind-%p.xml" \
             --num-callers=100 \
             --trace-children=yes \
             --max-stackframe=4194304 \
@@ -79,21 +81,36 @@ jobs:
             --alignment=16 \
             --malloc-fill=0xDE \
             --free-fill=0xFE \
+            --suppressions="$GITHUB_WORKSPACE/valgrind.supp" \
             ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE" --output-on-failure
+          valgrind_exit=$?
 
+          # Merge all per-process reports into summary
           echo "## Valgrind Summary" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f valgrind-report.xml ]; then
-            errors=$(grep -c '<error ' valgrind-report.xml 2>/dev/null || echo 0)
-            definite_leaks=$(grep -c 'leak_kind="definite"' valgrind-report.xml 2>/dev/null || echo 0)
-            echo "Errors found: $errors, Definite leaks: $definite_leaks" >> "$GITHUB_STEP_SUMMARY"
-            if [ "$errors" -gt 0 ]; then
-              echo "::warning::Valgrind detected $errors error(s) and $definite_leaks definite leak(s) (see report artifact)"
-            else
-              echo "No valgrind errors detected."
-            fi
-          else
-            echo "No valgrind report generated." >> "$GITHUB_STEP_SUMMARY"
+          total_errors=0
+          total_definite=0
+          for report in "$GITHUB_WORKSPACE"/valgrind-*.xml; do
+            [ -f "$report" ] || continue
+            pid_errors=$(grep -c '<error ' "$report" 2>/dev/null || echo 0)
+            pid_definite=$(grep -c 'leak_kind="definite"' "$report" 2>/dev/null || echo 0)
+            total_errors=$((total_errors + pid_errors))
+            total_definite=$((total_definite + pid_definite))
+            echo "Report $(basename "$report"): $pid_errors errors, $pid_definite definite leaks" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "Total errors: $total_errors, Definite leaks: $total_definite" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$total_errors" -gt 0 ]; then
+            echo "::warning::Valgrind detected $total_errors error(s) and $total_definite definite leak(s)"
           fi
+
+          # Create merged report for artifact
+          echo '<?xml version="1.0"?><valgrindoutput>' > "$GITHUB_WORKSPACE/valgrind-report.xml"
+          for report in "$GITHUB_WORKSPACE"/valgrind-*.xml; do
+            [ -f "$report" ] || continue
+            sed -n '/<error>/,/<\/error>/p' "$report" >> "$GITHUB_WORKSPACE/valgrind-report.xml" 2>/dev/null
+          done
+          echo '</valgrindoutput>' >> "$GITHUB_WORKSPACE/valgrind-report.xml"
+
+          exit $valgrind_exit
 
       - name: Upload Valgrind report
         if: always()
