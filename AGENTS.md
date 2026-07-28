@@ -35,3 +35,4 @@ Tag format: `v111.0.x`. Release uploads binaries, `.nix`, and all dotfiles. Vers
 ## Commits
 
 Format: `type: short description` (1 line) + blank line + `Signed-off-by: ...`. No emojis, no multi-line messages. For non-owner commits, preserve original author's name and email.
+STRICT NEW RULES: Commits must be highly granular (many small, concrete commits). The word 'and' is FORBIDDEN. Numbers are FORBIDDEN. The word 'sprint' is FORBIDDEN. Hyphens/dashes are FORBIDDEN in the commit message subject.
