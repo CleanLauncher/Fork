@@ -1,0 +1,43 @@
+name: Sync Website
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "website/**"
+
+permissions: {}
+
+jobs:
+  sync:
+    name: Push website to CleanLauncher/website
+
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Push to website repo
+        env:
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_PAT }}
+        run: |
+          git clone https://x-access-token:${WEBSITE_TOKEN}@github.com/CleanLauncher/website.git /tmp/website-repo
+          cd /tmp/website-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm -rf . 2>/dev/null || true
+          cp -r "$GITHUB_WORKSPACE/website/." .
+          rm -rf .git
+          git init
+          git remote add origin https://x-access-token:${WEBSITE_TOKEN}@github.com/CleanLauncher/website.git
+          git fetch origin
+          git checkout -B main origin/main
+          git add -A
+          git diff --cached --quiet && echo "No changes to push" && exit 0
+          git commit -s -m "sync: update website from Launcher repo"
+          git push origin main
