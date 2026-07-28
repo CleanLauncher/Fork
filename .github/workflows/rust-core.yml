@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: "true"
+          submodules: "recursive"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -51,7 +51,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: "true"
+          submodules: "recursive"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -82,7 +82,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: "true"
+          submodules: "recursive"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -115,7 +115,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: "true"
+          submodules: "recursive"
 
       - name: Install Rust toolchain with miri
         uses: dtolnay/rust-toolchain@nightly
