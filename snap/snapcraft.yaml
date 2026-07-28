@@ -1,0 +1,45 @@
+name: cleanlauncher
+base: core24
+version: '111.0.6'
+summary: CleanLauncher
+description: |
+  CleanLauncher is a C++/Rust launcher application.
+
+grade: stable
+confinement: strict
+
+parts:
+  launcher:
+    plugin: cmake
+    source: .
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+    build-packages:
+      - build-essential
+      - qt6-base-dev
+      - libqt6networkauth6-dev
+      - extra-cmake-modules
+      - pkg-config
+      - scdoc
+      - libcmark-dev
+      - cmark
+      - libarchive-dev
+      - libqrencode-dev
+      - zlib1g-dev
+      - libxcb-cursor-dev
+      - libtomlplusplus-dev
+      - libgl1-mesa-dev
+      - libglvnd-dev
+      - gamemode-dev
+      - openjdk-17-jdk-headless
+    stage-packages:
+      - libqt6core6
+      - libqt6gui6
+      - libqt6widgets6
+      - libqt6networkauth6
+      - libgamemode0
+
+apps:
+  launcher:
+    command: usr/bin/launcher
+    extensions: [kde-neon]
