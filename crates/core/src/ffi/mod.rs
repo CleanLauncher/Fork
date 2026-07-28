@@ -14,3 +14,5 @@ pub mod ffi_bridge;
 pub mod instance_generator;
 pub mod settings_ffi;
 pub mod string_ffi;
+pub mod launcher_ffi;
+pub mod download_ffi;
