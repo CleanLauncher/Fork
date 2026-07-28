@@ -12,6 +12,8 @@ parts:
   launcher:
     plugin: cmake
     source: .
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
     build-packages:
       - build-essential
       - qt6-base-dev

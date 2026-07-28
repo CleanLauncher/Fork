@@ -268,6 +268,7 @@ jobs:
               sha256sum "$release_checksum_file" >> "Launcher-$RELEASE_VERSION-SHA256.txt"
             fi
           done
+          cd "$GITHUB_WORKSPACE"
 
           echo "Final release files:"
           ls -la "$RELEASE_OUTPUT_DIRECTORY/"

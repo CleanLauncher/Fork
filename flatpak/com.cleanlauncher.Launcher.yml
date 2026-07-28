@@ -14,7 +14,7 @@ modules:
     buildsystem: simple
     build-commands:
       - mkdir -p /app/jdk
-      - mv jdk-17.0.2 /app/jdk/jdk
+      - cp -r . /app/jdk/jdk
     sources:
       - type: archive
         url: https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
