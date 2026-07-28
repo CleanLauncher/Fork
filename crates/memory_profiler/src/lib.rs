@@ -1,9 +1,9 @@
-pub mod allocator;
+pub mod core;
 
 #[cfg(feature = "enable_profiler")]
 #[global_allocator]
-static ALLOC: allocator::TrackingAllocator = allocator::TrackingAllocator;
+static ALLOC: core::TrackingAllocator = core::TrackingAllocator;
 
 pub fn memory_usage() -> usize {
-    allocator::get_current_memory_usage()
+    core::get_current_memory_usage()
 }

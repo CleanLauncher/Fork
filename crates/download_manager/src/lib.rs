@@ -1,9 +1,13 @@
 pub mod models;
-pub mod downloader;
-pub mod hash_util;
+pub mod core;
+pub mod utils;
+
+pub use core::DownloadManager;
+pub use models::{DownloadStatus, DownloadTask};
+pub use utils::verify_file_hash;
 
 use models::DownloadTask;
-use downloader::Downloader;
+use core::Downloader;
 
 pub async fn download_file(task: &DownloadTask) -> Result<(), String> {
     log::info!("Starting download for {}", task.url);
