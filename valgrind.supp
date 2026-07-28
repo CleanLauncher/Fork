@@ -2,47 +2,46 @@
 # These are one-time global allocations cleaned up at process exit
 
 # Qt QCoreApplication and QTEST_GUILESS_MAIN initialization
-# Leaks originating from Qt core library during startup
 {
-   Qt-core-init-leaks
+   Qt-core-init-definite
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libQt6Core.so*
+   obj:*/libQt6Core.so*
 }
 {
    Qt-core-init-reachable
    Memcheck:Leak
    match-leak-kinds: still-reachable
    ...
-   lib:libQt6Core.so*
+   obj:*/libQt6Core.so*
 }
 
-# Qt GUI/Widgets library initialization
+# Qt GUI library initialization
 {
-   Qt-gui-init-leaks
+   Qt-gui-init
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libQt6Gui.so*
+   obj:*/libQt6Gui.so*
 }
 
 # Qt XML parsing library
 {
-   Qt-xml-init-leaks
+   Qt-xml-init
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libQt6Xml.so*
+   obj:*/libQt6Xml.so*
 }
 
 # Qt Network library
 {
-   Qt-network-init-leaks
+   Qt-network-init
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libQt6Network.so*
+   obj:*/libQt6Network.so*
 }
 
 # Qt Test framework internal allocations
@@ -51,7 +50,16 @@
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libQt6Test.so*
+   obj:*/libQt6Test.so*
+}
+
+# Qt widgets
+{
+   Qt-widgets-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   obj:*/libQt6Widgets.so*
 }
 
 # GLib main loop, thread system, and memory allocator
@@ -60,14 +68,14 @@
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libglib-2.0.so*
+   obj:*/libglib-2.0.so*
 }
 {
    GLib-gthread
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libgthread-2.0.so*
+   obj:*/libgthread-2.0.so*
 }
 
 # OpenSSL global initialization
@@ -76,14 +84,14 @@
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libssl.so*
+   obj:*/libssl.so*
 }
 {
    OpenSSL-crypto-init
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libcrypto.so*
+   obj:*/libcrypto.so*
 }
 
 # X11 display and input handling
@@ -92,16 +100,48 @@
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libX11.so*
+   obj:*/libX11.so*
 }
 
-# CTest process internal allocations
+# ICU unicode library
+{
+   ICU-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   obj:*/libicui18n.so*
+}
+{
+   ICU-uc-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   obj:*/libicuuc.so*
+}
+{
+   ICU-data-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   obj:*/libicudata.so*
+}
+
+# Fontconfig
+{
+   fontconfig-init
+   Memcheck:Leak
+   match-leak-kinds: definite indirect
+   ...
+   obj:*/libfontconfig.so*
+}
+
+# CTest process itself
 {
    ctest-internal
    Memcheck:Leak
    match-leak-kinds: still-reachable
    ...
-   obj:/usr/local/bin/ctest
+   obj:*/ctest
 }
 
 # libc internal allocations (thread-local storage, etc.)
@@ -110,5 +150,5 @@
    Memcheck:Leak
    match-leak-kinds: definite indirect
    ...
-   lib:libc.so*
+   obj:*/libc.so*
 }
