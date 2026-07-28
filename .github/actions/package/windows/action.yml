@@ -1,0 +1,201 @@
+name: Package for Windows
+description: Create Windows packages for Launcher
+
+inputs:
+  version:
+    description: Launcher version
+    required: true
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+  msystem:
+    description: MSYS2 subsystem to use
+    required: false
+  certificate-base64:
+    description: Base64 encoded PFX certificate for code signing
+    required: false
+  certificate-password:
+    description: Password for the PFX certificate
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Package (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: bash
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+      run: |
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}"
+        touch "$INSTALL_DIR/manifest.txt"
+        for l in $(find "$INSTALL_DIR" -type f); do
+          l=$(cygpath -u "$l")
+          l="${l#$(pwd)/}"
+          l="${l#$INSTALL_DIR/}"
+          l="${l#./}"
+          echo "$l"
+        done >> "$INSTALL_DIR/manifest.txt"
+
+    - name: Package (MSVC)
+      if: ${{ inputs.msystem == '' }}
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+      run: |
+        cmake --install "$env:BUILD_DIR" --config "${{ inputs.build-type }}"
+
+        cd "${{ github.workspace }}"
+
+        Get-ChildItem "$env:INSTALL_DIR" -Recurse |
+          ForEach-Object { $_.FullName } |
+          Resolve-Path -Relative |
+          ForEach-Object { $_.TrimStart('.\').TrimStart("$env:INSTALL_DIR").TrimStart('\') } |
+          Out-File -FilePath "$env:INSTALL_DIR/manifest.txt"
+
+    - name: Package (MinGW, portable)
+      if: ${{ inputs.msystem != '' }}
+      shell: bash
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        cp -r "$INSTALL_DIR" "$INSTALL_PORTABLE_DIR"
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "$INSTALL_PORTABLE_DIR" --component portable
+        for l in $(find "$INSTALL_PORTABLE_DIR" -type f); do
+          l=$(cygpath -u "$l")
+          l="${l#$(pwd)/}"
+          l="${l#$INSTALL_PORTABLE_DIR/}"
+          l="${l#./}"
+          echo "$l"
+        done >> "$INSTALL_PORTABLE_DIR/manifest.txt"
+
+    - name: Package (MSVC, portable)
+      if: ${{ inputs.msystem == '' }}
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        Copy-Item -Recurse "$env:INSTALL_DIR" "$env:INSTALL_PORTABLE_DIR"
+        cmake --install "$env:BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "$env:INSTALL_PORTABLE_DIR" --component portable
+
+        Get-ChildItem "$env:INSTALL_PORTABLE_DIR" -Recurse |
+          ForEach-Object { $_.FullName } |
+          Resolve-Path -Relative |
+          ForEach-Object { $_.TrimStart('.\').TrimStart("$env:INSTALL_PORTABLE_DIR").TrimStart('\') } |
+          Out-File -FilePath "$env:INSTALL_PORTABLE_DIR/manifest.txt"
+
+    - name: Sign binaries
+      shell: pwsh
+      env:
+        CERT_BASE64: ${{ inputs.certificate-base64 }}
+        CERT_PASSWORD: ${{ inputs.certificate-password }}
+        INSTALL_DIR: install
+      run: |
+        $pfxPath = "$env:TEMP\cert.pfx"
+        $certPassword = "ci-password"
+        $isSelfSigned = $false
+        if ($env:CERT_BASE64) {
+            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
+            $certPassword = $env:CERT_PASSWORD
+        } else {
+            Write-Host "No certificate provided, generating a self-signed certificate..."
+            $cert = New-SelfSignedCertificate -Subject "CN=CleanLauncher" -Type CodeSigningCert -CertStoreLocation "Cert:\CurrentUser\My"
+            $securePassword = ConvertTo-SecureString -String $certPassword -Force -AsPlainText
+            Export-PfxCertificate -Cert $cert -FilePath $pfxPath -Password $securePassword
+            $isSelfSigned = $true
+        }
+        "ACTIVE_CERT_PASSWORD=$certPassword" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        if ($isSelfSigned) {
+            "IS_SELF_SIGNED=true" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        }
+
+        $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match "\\x64\\" } | Select-Object -First 1).FullName
+        if (-not $signtool) { Write-Error "signtool.exe not found"; exit 1 }
+        $filesToSign = Get-ChildItem -Path "$env:INSTALL_DIR" -Include *.exe,*.dll -Recurse | Select-Object -ExpandProperty FullName
+        $signCount = 0
+        foreach ($file in $filesToSign) {
+            Write-Host "Signing $file..."
+            if ($isSelfSigned) {
+                & $signtool sign /v /fd SHA256 /f $pfxPath /p $certPassword $file
+            } else {
+                & $signtool sign /v /fd SHA256 /f $pfxPath /p $certPassword /tr http://timestamp.digicert.com /td SHA256 $file
+            }
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to sign $file"
+                exit 1
+            }
+            $signCount++
+        }
+        Write-Host "Signed $signCount files successfully"
+
+    - name: Package (installer)
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+        NSCURL_VERSION: "v24.9.26.122"
+        NSCURL_SHA256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
+      run: |
+        New-Item -Name NSISPlugins -ItemType Directory -Force
+        Invoke-WebRequest "https://github.com/negrutiu/nsis-nscurl/releases/download/${{ env.NSCURL_VERSION }}/NScurl.zip" -OutFile "NSISPlugins/NScurl.zip"
+        $hash = Get-FileHash "NSISPlugins/NScurl.zip" -Algorithm Sha256 | Select-Object -ExpandProperty Hash
+        if ($hash -ne "${{ env.NSCURL_SHA256 }}") {
+          Write-Error "NSCurl.zip sha256 mismatch"
+          exit 1
+        }
+        Expand-Archive -Path "NSISPlugins/NScurl.zip" -DestinationPath "NSISPlugins/NScurl"
+
+        cd "${{ github.workspace }}/${{ env.INSTALL_DIR }}"
+        makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/res/win_install.nsi"
+
+    - name: Package (portable zip)
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        $portableDir = "${{ github.workspace }}\${{ env.INSTALL_PORTABLE_DIR }}"
+        if (Test-Path "$portableDir") {
+          Compress-Archive -Path "$portableDir\*" -DestinationPath "Launcher-portable.zip" -Force
+        }
+
+    - name: Sign installer
+      shell: pwsh
+      run: |
+        $pfxPath = "$env:TEMP\cert.pfx"
+        $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match "\\x64\\" } | Select-Object -First 1).FullName
+        if (-not $signtool) { Write-Error "signtool.exe not found"; exit 1 }
+        Write-Host "Signing Launcher-Setup.exe..."
+        if ($env:IS_SELF_SIGNED -eq "true") {
+            & $signtool sign /v /fd SHA256 /f $pfxPath /p $env:ACTIVE_CERT_PASSWORD "Launcher-Setup.exe"
+        } else {
+            & $signtool sign /v /fd SHA256 /f $pfxPath /p $env:ACTIVE_CERT_PASSWORD /tr http://timestamp.digicert.com /td SHA256 "Launcher-Setup.exe"
+        }
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to sign Launcher-Setup.exe"
+            exit 1
+        }
+        Write-Host "Installer signed successfully"
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
+        path: Launcher-Setup.exe
+
+    - name: Upload portable zip
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-Portable-${{ inputs.version }}-${{ inputs.build-type }}
+        path: Launcher-portable.zip

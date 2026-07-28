@@ -1,0 +1,70 @@
+name: Setup Linux dependencies
+description: Install and setup dependencies for building Launcher
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install host dependencies
+      shell: bash
+      run: |
+        sudo apt-get -y update
+        sudo apt-get -y install \
+          dpkg-dev \
+          ninja-build extra-cmake-modules pkg-config scdoc \
+          cmark gamemode-dev libarchive-dev libcmark-dev libqrencode-dev zlib1g-dev \
+          libxcb-cursor-dev libtomlplusplus-dev \
+          libgl1-mesa-dev libglu1-mesa-dev libglvnd-dev
+
+    - name: Setup AppImage tooling
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        mkdir -p ~/bin
+
+        if [ -n "${RUNNER_ARCH:-}" ]; then
+          case "$RUNNER_ARCH" in
+            X64)   APPIMAGE_ARCH="x86_64" ;;
+            ARM64) APPIMAGE_ARCH="aarch64" ;;
+            *)
+              dpkg_arch="$(dpkg --print-architecture 2>/dev/null)"
+              if [ -z "$dpkg_arch" ]; then
+                dpkg_arch="$(uname -m 2>/dev/null || arch 2>/dev/null)"
+              fi
+              dpkg_arch="$(echo "$dpkg_arch" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+              case "$dpkg_arch" in
+                "amd64"|"x86_64")  APPIMAGE_ARCH="x86_64" ;;
+                "arm64"|"aarch64") APPIMAGE_ARCH="aarch64" ;;
+                *) echo "::error::Unrecognized architecture: '$dpkg_arch'"; exit 1 ;;
+              esac
+              ;;
+          esac
+        else
+          dpkg_arch="$(dpkg --print-architecture 2>/dev/null || uname -m 2>/dev/null || arch 2>/dev/null)"
+          dpkg_arch="$(echo "$dpkg_arch" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+          case "$dpkg_arch" in
+            "amd64"|"x86_64")  APPIMAGE_ARCH="x86_64" ;;
+            "arm64"|"aarch64") APPIMAGE_ARCH="aarch64" ;;
+            *) echo "::error::Unrecognized architecture: '$dpkg_arch'"; exit 1 ;;
+          esac
+        fi
+        echo "Detected APPIMAGE_ARCH: $APPIMAGE_ARCH"
+
+        gh release download \
+          --repo VHSgunzo/sharun \
+          --pattern "sharun-$APPIMAGE_ARCH-aio" \
+          --output ~/bin/sharun
+
+        gh release download continuous \
+          --repo DioEgizio/go-appimage \
+          --pattern "mkappimage-*-$APPIMAGE_ARCH.AppImage" \
+          --output ~/bin/mkappimage
+
+        gh release download \
+          --repo AppImageCommunity/AppImageUpdate \
+          --pattern "AppImageUpdate-$APPIMAGE_ARCH.AppImage" \
+          --output ~/bin/AppImageUpdate.AppImage
+
+        chmod +x ~/bin/*
+        echo "$HOME/bin" >> "$GITHUB_PATH"

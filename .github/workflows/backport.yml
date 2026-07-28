@@ -1,0 +1,68 @@
+name: Backport
+
+on:
+  pull_request_target:
+    types: [closed, labeled]
+
+permissions: {}
+
+jobs:
+  backport:
+    permissions:
+      contents: write
+      pull-requests: write
+    name: Backport Pull Request
+    if: github.event.pull_request.merged == true && (github.event_name != 'labeled' || startsWith('backport', github.event.label.name))
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config --global user.name "Alessio Attilio"
+          git config --global user.email "attilio.alessio@protonmail.com"
+
+      - name: Find backport labels and create PRs
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          LABELS=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --json labels --jq '.labels[].name')
+
+          for label in $LABELS; do
+            if [[ "$label" =~ ^backport-(.+)$ ]]; then
+              TARGET_BRANCH="${BASH_REMATCH[1]}"
+              echo "Backporting PR #$PR_NUMBER to $TARGET_BRANCH"
+
+              BACKPORT_BRANCH="backport/${TARGET_BRANCH}/${PR_NUMBER}"
+
+              git checkout -b "$BACKPORT_BRANCH" "$HEAD_SHA"
+              git cherry-pick -x "$HEAD_SHA" || {
+                echo "Cherry-pick failed for $TARGET_BRANCH, creating empty backport"
+                git cherry-pick --abort
+                git checkout -b "$BACKPORT_BRANCH" "$HEAD_SHA"
+                git commit --allow-empty -m "cherry-pick of #$PR_NUMBER failed - manual resolution needed"
+              }
+              git push origin "$BACKPORT_BRANCH"
+
+              gh pr create \
+                --repo "${{ github.repository }}" \
+                --base "$TARGET_BRANCH" \
+                --head "$BACKPORT_BRANCH" \
+                --title "[$TARGET_BRANCH] $PR_TITLE" \
+                --body "Bot-based backport to \`$TARGET_BRANCH\`, triggered by a label in #$PR_NUMBER.
+
+              Original PR: #${PR_NUMBER}" \
+                --label "backport"
+
+              git checkout -
+            fi
+          done

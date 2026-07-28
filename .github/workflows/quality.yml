@@ -1,0 +1,88 @@
+name: Quality
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - "master"
+      - "develop"
+      - "release-*"
+  pull_request:
+
+permissions: {}
+
+jobs:
+  strict-build:
+    name: Strict warnings build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      BUILD_TYPE: Debug
+      CMAKE_PRESET: linux
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          artifact-name: Linux
+          qt-version: 6.10.2
+
+      - name: Configure with strict warnings
+        run: |
+          cmake --preset "$CMAKE_PRESET" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -Wshadow -Wconversion" \
+            -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror -Wshadow -Wconversion"
+
+      - name: Build
+        run: cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE" 2>&1 | tee build.log
+
+  todo-check:
+    name: TODO/FIXME audit
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Find TODO/FIXME/HACK comments
+        run: |
+          FOUND=0
+          echo "## TODO/FIXME/HACK" >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r match; do
+            echo "$match" >> "$GITHUB_STEP_SUMMARY"
+            FOUND=$((FOUND + 1))
+          done < <(grep -rn 'TODO\|FIXME\|HACK\|XXX\|WORKAROUND' \
+            src/ --include='*.cpp' --include='*.h' --include='*.hpp' 2>/dev/null)
+          echo "Found **$FOUND** items." >> "$GITHUB_STEP_SUMMARY"
+          echo "Found $FOUND TODO/FIXME/HACK comments."
+
+  include-guard:
+    name: Include guard check
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Verify header include guards
+        run: |
+          FAILED=0
+          while IFS= read -r header; do
+            if ! grep -q '#pragma once\|#ifndef.*_H' "$header" 2>/dev/null; then
+              echo "::warning file=$header::Missing include guard or #pragma once"
+              FAILED=1
+            fi
+          done < <(find src/ -name '*.h' -o -name '*.hpp' | grep -v './libraries/')
+          echo "Include guard check completed."

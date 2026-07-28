@@ -1,0 +1,327 @@
+name: Package for Linux
+description: Create Linux packages for Launcher
+
+inputs:
+  version:
+    description: Launcher version
+    required: true
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+    default: Linux
+  qt-version:
+    description: Version of Qt used
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Cleanup Qt installation
+      shell: bash
+      run: |
+        rm -rf "$QT_PLUGIN_PATH"/printsupport
+        rm -rf "$QT_PLUGIN_PATH"/sqldrivers
+        rm -rf "$QT_PLUGIN_PATH"/help
+        rm -rf "$QT_PLUGIN_PATH"/designer
+        rm -rf "$QT_PLUGIN_PATH"/qmltooling
+        rm -rf "$QT_PLUGIN_PATH"/qmlls
+        rm -rf "$QT_PLUGIN_PATH"/qmllint
+        rm -rf "$QT_PLUGIN_PATH"/platformthemes/libqgtk3.so
+
+    - name: Setup build variables
+      shell: bash
+      run: |
+        dpkg_arch="$(dpkg-architecture -q DEB_HOST_ARCH_CPU 2>/dev/null)"
+        if [ -z "$dpkg_arch" ]; then
+          dpkg_arch="$(uname -m)"
+        fi
+        case "$dpkg_arch" in
+          "amd64"|"x86_64")  APPIMAGE_ARCH="x86_64";  DEB_ARCH="amd64";  RPM_ARCH="x86_64" ;;
+          "arm64"|"aarch64") APPIMAGE_ARCH="aarch64"; DEB_ARCH="arm64";  RPM_ARCH="aarch64" ;;
+          *) echo "::error::Unrecognized architecture: $dpkg_arch"; exit 1 ;;
+        esac
+        echo "APPIMAGE_ARCH=$APPIMAGE_ARCH" >> "$GITHUB_ENV"
+        echo "DEB_ARCH=$DEB_ARCH" >> "$GITHUB_ENV"
+        echo "RPM_ARCH=$RPM_ARCH" >> "$GITHUB_ENV"
+        echo "DEB_HOST_MULTIARCH=$(dpkg-architecture -q DEB_HOST_MULTIARCH 2>/dev/null)" >> "$GITHUB_ENV"
+
+    - name: Package AppImage
+      shell: bash
+      env:
+        VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
+        BUILD_DIR: build
+        INSTALL_APPIMAGE_DIR: install-appdir
+      run: |
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "$INSTALL_APPIMAGE_DIR"
+
+        cp "$BUILD_DIR/res/io.github.launcher.Launcher.desktop" "$INSTALL_APPIMAGE_DIR/"
+        cp "${{ github.workspace }}/res/io.github.launcher.Launcher_256.png" "$INSTALL_APPIMAGE_DIR/io.github.launcher.Launcher.png"
+        cp "${{ github.workspace }}/res/io.github.launcher.Launcher.svg" "$INSTALL_APPIMAGE_DIR/io.github.launcher.Launcher.svg"
+
+        # Bundle all shared library dependencies via sharun
+        sharun lib4bin \
+          --hard-links \
+          --with-hooks \
+          --dst-dir "$INSTALL_APPIMAGE_DIR" \
+          "$INSTALL_APPIMAGE_DIR"/bin/* \
+          "$QT_PLUGIN_PATH"/*/*.so \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libGL*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libX*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libxcb*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libxkb*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libEGL*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libvulkan*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libwayland*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libdrm*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libgbm*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libfontconfig*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libfreetype*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libharfbuzz*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libpng*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libjpeg*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libtiff*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libwebp*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libzstd*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libcrypto*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libssl*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libffi*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libpcre*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libexpat*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libuuid*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libbz2*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libz*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libstdc++.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libgcc_s.so*
+
+        # Bundle Qt platform plugins explicitly
+        for plugin_dir in "$QT_PLUGIN_PATH"/platforms "$QT_PLUGIN_PATH"/platformthemes "$QT_PLUGIN_PATH"/styles "$QT_PLUGIN_PATH"/imageformats "$QT_PLUGIN_PATH"/iconengines "$QT_PLUGIN_PATH"/tls; do
+          if [ -d "$plugin_dir" ]; then
+            mkdir -p "$INSTALL_APPIMAGE_DIR/$(basename "$plugin_dir")"
+            cp -a "$plugin_dir"/* "$INSTALL_APPIMAGE_DIR/$(basename "$plugin_dir")/" 2>/dev/null
+          fi
+        done
+
+        # Bundle fonts if available
+        if [ -d "/usr/share/fonts" ]; then
+          mkdir -p "$INSTALL_APPIMAGE_DIR/fonts"
+          cp -a /usr/share/fonts/truetype/dejavu "$INSTALL_APPIMAGE_DIR/fonts/" 2>/dev/null
+        fi
+
+        cp ~/bin/AppImageUpdate.AppImage "$INSTALL_APPIMAGE_DIR"/bin/
+        find "$INSTALL_APPIMAGE_DIR" -name '*gamemode*' -exec rm {} +
+
+        echo "LAUNCHER_DISABLE_GLVULKAN=1" >> "$INSTALL_APPIMAGE_DIR"/.env
+        echo "QT_QPA_PLATFORMTHEME=xdgdesktopportal" >> "$INSTALL_APPIMAGE_DIR"/.env
+        echo "QT_PLUGIN_PATH=\$APPDIR/plugins" >> "$INSTALL_APPIMAGE_DIR"/.env
+        echo "LD_LIBRARY_PATH=\$APPDIR/lib:\$APPDIR/plugins:\$LD_LIBRARY_PATH" >> "$INSTALL_APPIMAGE_DIR"/.env
+        mv "$INSTALL_APPIMAGE_DIR"/{sharun,AppRun}
+
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          APPIMAGE_DEST="Launcher-Linux-$APPIMAGE_ARCH.AppImage"
+        else
+          APPIMAGE_DEST="Launcher-Linux-$VERSION-${{ inputs.build-type }}-$APPIMAGE_ARCH.AppImage"
+        fi
+
+        mkappimage \
+          --updateinformation "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|Launcher-Linux-$APPIMAGE_ARCH.AppImage.zsync" \
+          "$INSTALL_APPIMAGE_DIR" \
+          "$APPIMAGE_DEST"
+
+    - name: Package .deb
+      shell: bash
+      env:
+        VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
+        BUILD_DIR: build
+        INSTALL_DEB_DIR: install-deb
+      run: |
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "/opt/launcher"
+
+        DEB_VERSION="${VERSION#v}"
+        if ! [[ "$DEB_VERSION" =~ ^[0-9] ]]; then
+          DEB_VERSION="0~git${DEB_VERSION}"
+        fi
+        DEB_PKG="launcher_${DEB_VERSION}_${DEB_ARCH}.deb"
+        mkdir -p "$INSTALL_DEB_DIR/DEBIAN"
+        mkdir -p "$INSTALL_DEB_DIR/opt/launcher"
+        cp -a /opt/launcher/* "$INSTALL_DEB_DIR/opt/launcher/"
+
+        printf 'Package: launcher\n' > "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Version: %s\n' "$DEB_VERSION" >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Section: games\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Priority: optional\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Architecture: %s\n' "$DEB_ARCH" >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Depends: libgl1-mesa-glx | libgl1, libglib2.0-0, libxcb-cursor0, libxcb1, libxkbcommon0\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Recommends: libgamemode0\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Maintainer: Clean Launcher Team <launcher@example.com>\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf 'Description: Clean Launcher: Minecraft Launcher\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+        printf ' Clean and maintained Minecraft launcher.\n' >> "$INSTALL_DEB_DIR/DEBIAN/control"
+
+        printf '#!/bin/bash\n' > "$INSTALL_DEB_DIR/DEBIAN/postinst"
+        printf 'update-desktop-database /usr/share/applications 2>/dev/null\n' >> "$INSTALL_DEB_DIR/DEBIAN/postinst"
+        printf 'update-mime-database /usr/share/mime 2>/dev/null\n' >> "$INSTALL_DEB_DIR/DEBIAN/postinst"
+        chmod 755 "$INSTALL_DEB_DIR/DEBIAN/postinst"
+
+        dpkg-deb --root-owner-group --build "$INSTALL_DEB_DIR" "$DEB_PKG"
+
+    - name: Package .rpm
+      shell: bash
+      env:
+        VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
+        BUILD_DIR: build
+      run: |
+        sudo apt-get -y install rpm
+
+        RPM_VERSION="${VERSION#v}"
+        if ! [[ "$RPM_VERSION" =~ ^[0-9] ]]; then
+          RPM_VERSION="0.git.${RPM_VERSION}"
+        fi
+        RPM_SPEC="/tmp/launcher.spec"
+        printf 'Name:           launcher\n' > "$RPM_SPEC"
+        printf 'Version:        %s\n' "$RPM_VERSION" >> "$RPM_SPEC"
+        printf 'Release:        1\n' >> "$RPM_SPEC"
+        printf 'Summary:        Minecraft Launcher\n' >> "$RPM_SPEC"
+        printf 'License:        GPL-3.0-only\n' >> "$RPM_SPEC"
+        printf 'Group:          Amusements/Games\n' >> "$RPM_SPEC"
+        printf 'URL:            https://github.com/CleanLauncher/Launcher\n' >> "$RPM_SPEC"
+        printf 'Requires:       mesa-libGL glib2 libxcb libxkbcommon\n' >> "$RPM_SPEC"
+        printf '\n' >> "$RPM_SPEC"
+        printf '%%description\n' >> "$RPM_SPEC"
+        printf 'Clean and maintained Minecraft launcher.\n' >> "$RPM_SPEC"
+        printf '\n' >> "$RPM_SPEC"
+        printf '%%install\n' >> "$RPM_SPEC"
+        printf 'mkdir -p %%{buildroot}/opt/launcher\n' >> "$RPM_SPEC"
+        printf 'cp -a /opt/launcher/* %%{buildroot}/opt/launcher/\n' >> "$RPM_SPEC"
+        printf '\n' >> "$RPM_SPEC"
+        printf '%%files\n' >> "$RPM_SPEC"
+        printf '/opt/launcher/*\n' >> "$RPM_SPEC"
+        printf '\n' >> "$RPM_SPEC"
+        printf '%%post\n' >> "$RPM_SPEC"
+        printf 'update-desktop-database /usr/share/applications 2>/dev/null\n' >> "$RPM_SPEC"
+
+        rpmbuild -bb "$RPM_SPEC" --define "_topdir /tmp/rpmbuild" \
+          --define "version $RPM_VERSION" \
+          --target "$RPM_ARCH"
+
+    - name: Package portable tarball
+      shell: bash
+      env:
+        BUILD_DIR: build
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "$INSTALL_PORTABLE_DIR"
+        cmake --install "$BUILD_DIR" --config "${{ inputs.build-type }}" --prefix "$INSTALL_PORTABLE_DIR" --component portable
+
+        # Bundle all shared library dependencies via sharun
+        sharun lib4bin \
+          --with-hooks \
+          --hard-links \
+          --dst-dir "$INSTALL_PORTABLE_DIR" \
+          "$INSTALL_PORTABLE_DIR"/bin/* \
+          "$QT_PLUGIN_PATH"/*/*.so \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libGL*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libX*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libxcb*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libxkb*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libEGL*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libvulkan*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libwayland*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libdrm*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libgbm*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libfontconfig*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libfreetype*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libharfbuzz*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libpng*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libjpeg*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libtiff*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libwebp*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libzstd*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libcrypto*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libssl*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libffi*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libpcre*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libexpat*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libuuid*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libbz2*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libz*.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libstdc++.so* \
+          /usr/lib/"$APPIMAGE_ARCH"-linux-gnu/libgcc_s.so*
+
+        # Bundle Qt platform plugins explicitly
+        for plugin_dir in "$QT_PLUGIN_PATH"/platforms "$QT_PLUGIN_PATH"/platformthemes "$QT_PLUGIN_PATH"/styles "$QT_PLUGIN_PATH"/imageformats "$QT_PLUGIN_PATH"/iconengines "$QT_PLUGIN_PATH"/tls; do
+          if [ -d "$plugin_dir" ]; then
+            mkdir -p "$INSTALL_PORTABLE_DIR/$(basename "$plugin_dir")"
+            cp -a "$plugin_dir"/* "$INSTALL_PORTABLE_DIR/$(basename "$plugin_dir")/" 2>/dev/null
+          fi
+        done
+
+        # Bundle fonts if available
+        if [ -d "/usr/share/fonts" ]; then
+          mkdir -p "$INSTALL_PORTABLE_DIR/fonts"
+          cp -a /usr/share/fonts/truetype/dejavu "$INSTALL_PORTABLE_DIR/fonts/" 2>/dev/null
+        fi
+
+        find "$INSTALL_PORTABLE_DIR" -name '*gamemode*' -exec rm {} +
+
+        # Create launcher script
+        printf '#!/bin/bash\nSCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"\nexport LD_LIBRARY_PATH="$SCRIPT_DIR/lib:$SCRIPT_DIR/plugins:${LD_LIBRARY_PATH:-}"\nexport QT_PLUGIN_PATH="$SCRIPT_DIR/plugins"\nexport QT_QPA_PLATFORMTHEME=xdgdesktopportal\nexec "$SCRIPT_DIR/bin/launcher" "$@"\n' > "$INSTALL_PORTABLE_DIR/launcher.sh"
+        chmod +x "$INSTALL_PORTABLE_DIR/launcher.sh"
+
+        for l in $(find "$INSTALL_PORTABLE_DIR" -type f -o -type l); do
+          l="${l#$(pwd)/}"
+          l="${l#$INSTALL_PORTABLE_DIR/}"
+          l="${l#./}"
+          echo "$l"
+        done > "$INSTALL_PORTABLE_DIR"/manifest.txt
+
+        cd "$INSTALL_PORTABLE_DIR"
+        tar -czf ../Launcher-portable.tar.gz *
+
+    - name: Generate checksums
+      shell: bash
+      run: |
+        for f in *.AppImage *.AppImage.zsync *.tar.gz *.deb /tmp/rpmbuild/RPMS/*/*.rpm; do
+          [ -f "$f" ] || continue
+          sha256sum "$f" > "$f.sha256"
+          sha512sum "$f" > "$f.sha512"
+        done
+
+    - name: Upload binary tarball
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-Qt6-Portable-${{ inputs.version }}-${{ inputs.build-type }}
+        path: Launcher-portable.tar.gz
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
+        path: Launcher-Linux-*${{ env.APPIMAGE_ARCH }}.AppImage
+
+    - name: Upload AppImage Zsync
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync
+        path: Launcher-Linux-*${{ env.APPIMAGE_ARCH }}.AppImage.zsync
+
+    - name: Upload .deb
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}.deb
+        path: "*.deb"
+
+    - name: Upload .rpm
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}.rpm
+        path: /tmp/rpmbuild/RPMS/*/*.rpm
+
+    - name: Upload checksums
+      uses: actions/upload-artifact@v7
+      with:
+        name: Launcher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}-checksums
+        path: "*.sha256"

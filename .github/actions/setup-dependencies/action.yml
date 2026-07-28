@@ -1,0 +1,154 @@
+name: Setup Dependencies
+description: Install and setup dependencies for building Launcher
+
+inputs:
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+  msystem:
+    description: MSYS2 subsystem to use
+    required: false
+  vcvars-arch:
+    description: Visual Studio architecture to use
+    required: false
+  qt-version:
+    description: Version of Qt to use
+    required: true
+
+outputs:
+  build-type:
+    description: Type of build used
+    value: ${{ inputs.build-type }}
+  qt-version:
+    description: Type of build used
+    value: ${{ inputs.qt-version }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Linux dependencies
+      if: ${{ runner.os == 'Linux' }}
+      uses: ./.github/actions/setup-dependencies/linux
+
+    - name: Setup macOS dependencies
+      if: ${{ runner.os == 'macOS' }}
+      uses: ./.github/actions/setup-dependencies/macos
+      with:
+        build-type: ${{ inputs.build-type }}
+
+    - name: Setup Windows dependencies
+      if: ${{ runner.os == 'Windows' }}
+      uses: ./.github/actions/setup-dependencies/windows
+      with:
+        build-type: ${{ inputs.build-type }}
+        msystem: ${{ inputs.msystem }}
+
+    - name: Install sccache (non-Windows Debug)
+      if: ${{ runner.os != 'Windows' && inputs.build-type == 'Debug' }}
+      shell: bash
+      run: |
+        SCCACHE_VERSION="v0.10.0"
+        case "$(uname -s)" in
+          Linux)
+            case "$(uname -m)" in
+              x86_64)  SCCACHE_ARCH="x86_64-unknown-linux-musl" ;;
+              aarch64) SCCACHE_ARCH="aarch64-unknown-linux-musl" ;;
+            esac
+            ;;
+          Darwin)
+            SCCACHE_ARCH="aarch64-apple-darwin"
+            ;;
+        esac
+        curl -fsSL "https://github.com/mozilla/sccache/releases/download/${SCCACHE_VERSION}/sccache-${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz" \
+          | tar xz --strip-components=1 -C /usr/local/bin "sccache-${SCCACHE_VERSION}-${SCCACHE_ARCH}/sccache"
+        sccache --version
+
+    - name: Set compiler launcher (non-Windows Debug)
+      if: ${{ runner.os != 'Windows' && inputs.build-type == 'Debug' }}
+      shell: bash
+      run: |
+        echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> "$GITHUB_ENV"
+
+    - name: Set compiler launcher (MSYS2 MinGW Debug)
+      if: ${{ runner.os == 'Windows' && inputs.msystem != '' && inputs.build-type == 'Debug' }}
+      shell: bash
+      run: |
+        echo "CMAKE_C_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+
+    - name: Install Qt (Linux aarch64)
+      if: ${{ inputs.msystem == '' && runner.os == 'Linux' && runner.arch == 'ARM64' }}
+      shell: bash
+      run: |
+        pip install aqtinstall
+        aqt install-qt linux_arm64 desktop "${{ inputs.qt-version }}" linux_gcc_arm64 \
+          -O "$GITHUB_WORKSPACE/qt" \
+          -m qtimageformats qtnetworkauth
+
+        QT_ROOT="$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/gcc_arm64"
+        if [ ! -d "$QT_ROOT" ]; then
+          echo "::error::Qt aarch64 directory not found at $QT_ROOT"
+          ls "$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/"
+          exit 1
+        fi
+
+        echo "Qt6_DIR=$QT_ROOT/lib/cmake/Qt6" >> "$GITHUB_ENV"
+        echo "CMAKE_PREFIX_PATH=$QT_ROOT" >> "$GITHUB_ENV"
+        echo "QT_PLUGIN_PATH=$QT_ROOT/plugins" >> "$GITHUB_ENV"
+        echo "$QT_ROOT/bin" >> "$GITHUB_PATH"
+
+    - name: Install Qt (non-MSYS2, non-aarch64)
+      if: ${{ inputs.msystem == '' && !(runner.os == 'Linux' && runner.arch == 'ARM64') }}
+      shell: bash
+      run: |
+        pip install aqtinstall
+
+        os_name="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        case "$os_name" in
+          linux)
+            QT_HOST="linux"
+            QT_ARCH="linux_gcc_64"
+            ;;
+          darwin)
+            QT_HOST="mac"
+            QT_ARCH="clang_64"
+            ;;
+          *)
+            QT_HOST="windows"
+            QT_ARCH="win64_msvc2022_64"
+            ;;
+        esac
+
+        aqt install-qt "$QT_HOST" desktop "${{ inputs.qt-version }}" "$QT_ARCH" \
+          -O "$GITHUB_WORKSPACE/qt" \
+          -m qtimageformats qtnetworkauth
+
+        QT_ROOT="$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/${QT_ARCH}"
+        if [ ! -d "$QT_ROOT" ]; then
+          QT_ROOT="$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/clang_64"
+        fi
+        if [ ! -d "$QT_ROOT" ]; then
+          QT_ROOT="$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/gcc_64"
+        fi
+        if [ ! -d "$QT_ROOT" ]; then
+          QT_ROOT="$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/macos"
+        fi
+        if [ ! -d "$QT_ROOT" ]; then
+          QT_ROOT="$(ls -d "$GITHUB_WORKSPACE"/qt/${{ inputs.qt-version }}/* 2>/dev/null | head -1)"
+        fi
+        if [ ! -d "$QT_ROOT" ]; then
+          echo "::error::Qt directory not found"
+          ls "$GITHUB_WORKSPACE/qt/${{ inputs.qt-version }}/"
+          exit 1
+        fi
+
+        echo "Qt6_DIR=$QT_ROOT/lib/cmake/Qt6" >> "$GITHUB_ENV"
+        echo "CMAKE_PREFIX_PATH=$QT_ROOT" >> "$GITHUB_ENV"
+        echo "QT_PLUGIN_PATH=$QT_ROOT/plugins" >> "$GITHUB_ENV"
+        echo "$QT_ROOT/bin" >> "$GITHUB_PATH"

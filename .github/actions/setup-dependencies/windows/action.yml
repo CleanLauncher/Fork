@@ -1,0 +1,125 @@
+name: Setup Windows dependencies
+description: Install and setup dependencies for building Launcher on Windows
+
+inputs:
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  msystem:
+    description: MSYS2 subsystem to use
+    required: false
+  vcvars-arch:
+    description: Visual Studio architecture to use
+    required: true
+    default: amd64
+
+runs:
+  using: composite
+
+  steps:
+    - name: Enter VS Developer shell (MSVC)
+      if: ${{ inputs.msystem == '' }}
+      shell: pwsh
+      run: |
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $installPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        $vcvarsall = Join-Path $installPath "VC\Auxiliary\Build\vcvarsall.bat"
+        cmd /c "`"$vcvarsall`" ${{ inputs.vcvars-arch }} && set" | ForEach-Object {
+          if ($_ -match "^(.+?)=(.*)$") {
+            [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+            "$($matches[1])=$($matches[2])" | Out-File -Append $env:GITHUB_ENV
+          }
+        }
+
+    - name: Setup Java (MSVC)
+      if: ${{ inputs.msystem == '' }}
+      uses: actions/setup-java@v5
+      with:
+        distribution: zulu
+        java-version: 17
+
+    - name: Setup vcpkg environment (MSVC)
+      if: ${{ inputs.msystem == '' }}
+      shell: bash
+      run: |
+        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+
+    - name: Setup MSYS2 (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ inputs.msystem }}
+        update: true
+        install: >-
+          ${{ inputs.msystem == 'CLANG64' && 'mingw-w64-clang-x86_64-ccache' ||
+              inputs.msystem == 'CLANGARM64' && 'mingw-w64-clang-aarch64-ccache' ||
+              inputs.msystem == 'MINGW64' && 'mingw-w64-x86_64-ccache' ||
+              'mingw-w64-ucrt-x86_64-ccache' }}
+
+    - name: Install MSYS2 packages (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      run: |
+        case "$MSYSTEM" in
+          CLANG64)    PKG="mingw-w64-clang-x86_64" ;;
+          CLANGARM64) PKG="mingw-w64-clang-aarch64" ;;
+          MINGW64)    PKG="mingw-w64-x86_64" ;;
+          UCRT64)     PKG="mingw-w64-ucrt-x86_64" ;;
+          *)          echo "Unknown msystem: $MSYSTEM"; exit 1 ;;
+        esac
+
+        pacman -S --noconfirm \
+          $PKG-toolchain \
+          $PKG-cmake \
+          $PKG-extra-cmake-modules \
+          $PKG-ninja \
+          $PKG-qt6-base \
+          $PKG-qt6-svg \
+          $PKG-qt6-imageformats \
+          $PKG-qt6-networkauth \
+          $PKG-cmark \
+          $PKG-qrencode \
+          $PKG-tomlplusplus \
+          $PKG-libarchive \
+          $PKG-ccache
+
+    - name: Set MSYS2 compiler for CMake (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      run: |
+        case "$MSYSTEM" in
+          CLANG64)    CC="clang.exe"; CXX="clang++.exe" ;;
+          CLANGARM64) CC="clang.exe"; CXX="clang++.exe" ;;
+          MINGW64)    CC="gcc.exe";   CXX="g++.exe" ;;
+          UCRT64)     CC="gcc.exe";   CXX="g++.exe" ;;
+        esac
+        FULL_CC="$MSYSTEM_PREFIX/bin/$CC"
+        FULL_CXX="$MSYSTEM_PREFIX/bin/$CXX"
+        if [ ! -f "$FULL_CC" ]; then
+          echo "::error::MSYS2 compiler not found: $FULL_CC"
+          ls "$MSYSTEM_PREFIX/bin/" | head -20
+          exit 1
+        fi
+        WIN_PREFIX="$(cygpath -w "$MSYSTEM_PREFIX")"
+        echo "MSYS2_PREFIX=$WIN_PREFIX" >> "$GITHUB_ENV"
+        echo "CC=$WIN_PREFIX\\bin\\$CC" >> "$GITHUB_ENV"
+        echo "CXX=$WIN_PREFIX\\bin\\$CXX" >> "$GITHUB_ENV"
+
+    - name: Retrieve ccache cache (MinGW)
+      if: ${{ inputs.msystem != '' && inputs.build-type == 'Debug' }}
+      uses: actions/cache@v5
+      with:
+        path: '${{ github.workspace }}\.ccache'
+        key: ${{ runner.os }}-${{ inputs.msystem }}-ccache-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.msystem }}-ccache
+
+    - name: Setup ccache (MinGW)
+      if: ${{ inputs.msystem != '' && inputs.build-type == 'Debug' }}
+      shell: msys2 {0}
+      run: |
+        ccache --set-config=cache_dir='${{ github.workspace }}/.ccache'
+        ccache --set-config=max_size='500M'
+        ccache --set-config=compression=true
+        ccache -p
