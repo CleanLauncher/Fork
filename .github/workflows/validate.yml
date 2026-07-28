@@ -91,7 +91,8 @@ jobs:
             COUNT=$((COUNT + 1))
             BODY=$(git log -1 --format='%B' "$hash")
             LINE_COUNT=$(echo "$BODY" | grep -c '^')
-            if [ "$LINE_COUNT" -ne 3 ]; then
+            # Allow 3 lines (message, empty, signed-off) or 4 lines (if trailing newline)
+            if [ "$LINE_COUNT" -gt 4 ] || [ "$LINE_COUNT" -lt 3 ]; then
               echo "::error file=.git commit=$hash::Commit message must be exactly one line + blank line + Signed-off-by (got $LINE_COUNT lines)"
               git log -1 --format='  %h %s' "$hash"
               FAILED=1
