@@ -1,0 +1,8 @@
+name: E2E Fabric
+on: [push, pull_request]
+jobs:
+  test-fabric:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test test_fabric --manifest-path crates/core/Cargo.toml

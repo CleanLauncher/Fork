@@ -1,0 +1,8 @@
+name: E2E CurseForge
+on: [push, pull_request]
+jobs:
+  test-curseforge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test test_curse --manifest-path crates/core/Cargo.toml

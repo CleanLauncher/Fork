@@ -1,0 +1,8 @@
+name: E2E Forge
+on: [push, pull_request]
+jobs:
+  test-forge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test test_forge --manifest-path crates/core/Cargo.toml

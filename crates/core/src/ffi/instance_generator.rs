@@ -1,12 +1,21 @@
 use std::fs;
 use std::path::Path;
 
+#[derive(Clone, Debug, PartialEq)]
 pub enum InstanceType {
     Vanilla,
     FTB,
     Tekkit,
+    Forge,
+    Fabric,
+    Quilt,
+    LiteLoader,
+    CurseForge,
+    Modrinth,
+    ATLauncher,
 }
 
+#[derive(Clone, Debug)]
 pub struct InstanceConfig {
     pub instance_type: InstanceType,
     pub version_or_modpack: String,
@@ -22,10 +31,17 @@ pub fn create_instance(base_path: &Path, name: &str, config: InstanceConfig) -> 
         InstanceType::Vanilla => "Vanilla",
         InstanceType::FTB => "FTB",
         InstanceType::Tekkit => "Tekkit",
+        InstanceType::Forge => "Forge",
+        InstanceType::Fabric => "Fabric",
+        InstanceType::Quilt => "Quilt",
+        InstanceType::LiteLoader => "LiteLoader",
+        InstanceType::CurseForge => "CurseForge",
+        InstanceType::Modrinth => "Modrinth",
+        InstanceType::ATLauncher => "ATLauncher",
     };
     
     let key = match config.instance_type {
-        InstanceType::Vanilla => "Version",
+        InstanceType::Vanilla | InstanceType::Forge | InstanceType::Fabric | InstanceType::Quilt | InstanceType::LiteLoader => "Version",
         _ => "Modpack",
     };
     

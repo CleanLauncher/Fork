@@ -1,0 +1,11 @@
+name: E2E Multi-Instance Matrix
+on: [push, pull_request]
+jobs:
+  test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        instance: [vanilla, forge, fabric, quilt, ftb, tekkit, curseforge, modrinth, atl, liteloader]
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test test_${{ matrix.instance }} --manifest-path crates/core/Cargo.toml
