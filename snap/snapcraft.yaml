@@ -29,6 +29,7 @@ parts:
       - libgl1-mesa-dev
       - libglvnd-dev
       - gamemode-dev
+      - openjdk-17-jdk-headless
     stage-packages:
       - libqt6core6
       - libqt6gui6

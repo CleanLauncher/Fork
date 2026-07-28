@@ -10,6 +10,15 @@ finish-args:
   - --share=network
   - --device=dri
 modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/jdk
+      - mv jdk-17.0.2 /app/jdk/jdk
+    sources:
+      - type: archive
+        url: https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
+        sha256: 0022753d0cceecacdd3a795dd4cea2bd7ffdf9dc06e22ffd1be98411742fbb44
   - name: gamemode
     buildsystem: meson
     config-opts:
@@ -62,6 +71,12 @@ modules:
         sha256: 5385bc1b8c2f20f3b91d258bf8ccc8cf62023935df2d2676b5b67049f31a049c
   - name: launcher
     buildsystem: cmake-ninja
+    env:
+      JAVA_HOME: /app/jdk/jdk
+    config-opts:
+      - -DCMAKE_JAVA_COMPILER=/app/jdk/jdk/bin/javac
+    build-options:
+      append-path: /app/jdk/jdk/bin
     sources:
       - type: dir
         path: ..

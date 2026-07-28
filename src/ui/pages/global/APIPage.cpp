@@ -96,7 +96,7 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
 
     onAutoServersChanged();
-    connect(ui->autoServersCheckBox, &QCheckBox::checkStateChanged, this, &APIPage::onAutoServersChanged);
+    connect(ui->autoServersCheckBox, &QCheckBox::toggled, this, &APIPage::onAutoServersChanged);
     connect(ui->setHostedServers, &QPushButton::clicked, this, [this] {
         constexpr auto key = NetworkCheck::Result::UsePrimary;
         ui->metaURL->setText(NetworkCheck::metaUrls().value(key));

@@ -147,7 +147,7 @@ jobs:
 
           # Source tarball
           cd "${{ github.workspace }}"
-          tar --exclude='.git' -czf "$RELEASE_OUTPUT_DIRECTORY/Launcher-$RELEASE_VERSION.tar.gz" .
+          tar --exclude='.git' --exclude="$RELEASE_OUTPUT_DIRECTORY" -czf "$RELEASE_OUTPUT_DIRECTORY/Launcher-$RELEASE_VERSION.tar.gz" .
 
           # Metadata archive (nix, flatpak, snap, resources)
           METADATA_TEMP_DIR=$(mktemp -d)
