@@ -1,14 +1,9 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod allocator;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[cfg(feature = "enable_profiler")]
+#[global_allocator]
+static ALLOC: allocator::TrackingAllocator = allocator::TrackingAllocator;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn memory_usage() -> usize {
+    allocator::get_current_memory_usage()
 }

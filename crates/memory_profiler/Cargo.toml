@@ -6,3 +6,7 @@ edition = "2024"
 [dependencies]
 libc = "0.2.189"
 log = "0.4.33"
+
+[features]
+enable_profiler = []
+
