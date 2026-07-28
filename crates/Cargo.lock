@@ -72,6 +72,7 @@ checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 name = "auth"
 version = "0.1.0"
 dependencies = [
+ "error",
  "log",
  "reqwest 0.13.4",
  "serde",
@@ -495,6 +496,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "download_manager"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -1309,6 +1318,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "process_launcher"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
 ]
 
 [[package]]
