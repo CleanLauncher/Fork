@@ -62,11 +62,13 @@ jobs:
           valgrind --tool=memcheck \
             --leak-check=full \
             --show-leak-kinds=all \
+            --errors-for-leak-kinds=definite,indirect \
             --track-origins=yes \
-            --trace-children=yes \
+            --error-exitcode=1 \
             --xml=yes \
             --xml-file=valgrind-report.xml \
             --num-callers=100 \
+            --trace-children=yes \
             --max-stackframe=4194304 \
             --main-stacksize=16777216 \
             --show-reachable=yes \

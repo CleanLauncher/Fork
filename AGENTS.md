@@ -30,7 +30,7 @@ Build runs in distrobox container `lb` (Fedora Toolbox). MSVC removed from CI, o
 
 ## Release
 
-Tag format: `v111.0.x`. Release uploads binaries, `.nix`, and all dotfiles. Version numbers in `res/launcher-config.yaml`.
+Tag format: `v111.0.x`. Release uploads binaries, `.nix`, and all dotfiles. Version numbers in `res/launcher-config.yaml`. Once a version is pushed as a release it must never be deleted or re-created.
 
 ## Commits
 

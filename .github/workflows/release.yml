@@ -292,8 +292,8 @@ jobs:
           fi
 
           if gh release view "$RELEASE_VERSION" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "Release $RELEASE_VERSION already exists, deleting to recreate."
-            gh release delete "$RELEASE_VERSION" --repo "${{ github.repository }}" --yes
+            echo "::error::Release $RELEASE_VERSION already exists. Releases must never be deleted or re-created."
+            exit 1
           fi
 
           RELEASE_NOTES=""
