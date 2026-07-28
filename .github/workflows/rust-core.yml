@@ -105,3 +105,34 @@ jobs:
       - name: Test
         run: cargo test --release
         working-directory: crates
+
+  rust-miri:
+    name: rust-miri
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: "true"
+
+      - name: Install Rust toolchain with miri
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+
+      - name: Cache cargo
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            crates/target
+          key: ${{ runner.os }}-cargo-miri-${{ hashFiles('crates/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-miri-
+
+      - name: Miri test
+        run: cargo miri test
+        working-directory: crates
