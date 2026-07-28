@@ -1,0 +1,152 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/icons/multimc">
+        <file>index.theme</file>
+
+        <!-- Functional UI icons -->
+        <file>scalable/launch.svg</file>
+        <file>scalable/delete.svg</file>
+        <file>scalable/tag.svg</file>
+        <file>scalable/rename.svg</file>
+        <file>scalable/shortcut.svg</file>
+        <file>scalable/export.svg</file>
+        <file>scalable/new.svg</file>
+        <file>scalable/server.svg</file>
+        <file>scalable/viewfolder.svg</file>
+
+        <!-- Status indicators -->
+        <file>16x16/status-bad.png</file>
+        <file>22x22/status-bad.png</file>
+        <file>24x24/status-bad.png</file>
+        <file>32x32/status-bad.png</file>
+        <file>48x48/status-bad.png</file>
+        <file>64x64/status-bad.png</file>
+        <file>16x16/status-good.png</file>
+        <file>22x22/status-good.png</file>
+        <file>24x24/status-good.png</file>
+        <file>32x32/status-good.png</file>
+        <file>48x48/status-good.png</file>
+        <file>64x64/status-good.png</file>
+        <file>16x16/status-yellow.png</file>
+        <file>22x22/status-yellow.png</file>
+        <file>24x24/status-yellow.png</file>
+        <file>32x32/status-yellow.png</file>
+        <file>48x48/status-yellow.png</file>
+        <file>64x64/status-yellow.png</file>
+        <file>16x16/status-running.png</file>
+        <file>22x22/status-running.png</file>
+        <file>24x24/status-running.png</file>
+        <file>32x32/status-running.png</file>
+        <file>48x48/status-running.png</file>
+        <file>64x64/status-running.png</file>
+
+        <!-- Minecraft icon -->
+        <file>16x16/minecraft.png</file>
+        <file>24x24/minecraft.png</file>
+        <file>32x32/minecraft.png</file>
+        <file>48x48/minecraft.png</file>
+        <file>256x256/minecraft.png</file>
+
+        <!-- Core functional icons -->
+        <file>16x16/copy.png</file>
+        <file>22x22/copy.png</file>
+        <file>32x32/copy.png</file>
+        <file>48x48/copy.png</file>
+        <file>64x64/copy.png</file>
+        <file>16x16/help.png</file>
+        <file>22x22/help.png</file>
+        <file>32x32/help.png</file>
+        <file>48x48/help.png</file>
+        <file>64x64/help.png</file>
+        <file>16x16/refresh.png</file>
+        <file>22x22/refresh.png</file>
+        <file>32x32/refresh.png</file>
+        <file>48x48/refresh.png</file>
+        <file>64x64/refresh.png</file>
+        <file>16x16/settings.png</file>
+        <file>22x22/settings.png</file>
+        <file>32x32/settings.png</file>
+        <file>48x48/settings.png</file>
+        <file>64x64/settings.png</file>
+        <file>16x16/instance-settings.png</file>
+        <file>22x22/instance-settings.png</file>
+        <file>32x32/instance-settings.png</file>
+        <file>48x48/instance-settings.png</file>
+        <file>16x16/viewfolder.png</file>
+        <file>22x22/viewfolder.png</file>
+        <file>32x32/viewfolder.png</file>
+        <file>48x48/viewfolder.png</file>
+        <file>64x64/viewfolder.png</file>
+
+        <!-- Account icons -->
+        <file>8x8/noaccount.png</file>
+        <file>16x16/noaccount.png</file>
+        <file>24x24/noaccount.png</file>
+        <file>32x32/noaccount.png</file>
+        <file>48x48/noaccount.png</file>
+        <file alias="8x8/accounts.png">8x8/noaccount.png</file>
+        <file alias="16x16/accounts.png">16x16/noaccount.png</file>
+        <file alias="24x24/accounts.png">24x24/noaccount.png</file>
+        <file alias="32x32/accounts.png">32x32/noaccount.png</file>
+        <file alias="48x48/accounts.png">48x48/noaccount.png</file>
+
+        <!-- Log icon -->
+        <file>16x16/log.png</file>
+        <file>24x24/log.png</file>
+        <file>32x32/log.png</file>
+        <file>48x48/log.png</file>
+        <file>64x64/log.png</file>
+
+        <!-- Mod/resource icons -->
+        <file>16x16/loadermods.png</file>
+        <file>24x24/loadermods.png</file>
+        <file>32x32/loadermods.png</file>
+        <file>64x64/loadermods.png</file>
+        <file>16x16/jarmods.png</file>
+        <file>24x24/jarmods.png</file>
+        <file>32x32/jarmods.png</file>
+        <file>64x64/jarmods.png</file>
+        <file>16x16/coremods.png</file>
+        <file>24x24/coremods.png</file>
+        <file>32x32/coremods.png</file>
+        <file>64x64/coremods.png</file>
+        <file>16x16/resourcepacks.png</file>
+        <file>24x24/resourcepacks.png</file>
+        <file>32x32/resourcepacks.png</file>
+        <file>64x64/resourcepacks.png</file>
+        <file>128x128/shaderpacks.png</file>
+
+        <!-- Server placeholder -->
+        <file>128x128/unknown_server.png</file>
+
+        <!-- Loader/framework logos (functional) -->
+        <file>scalable/instances/ftb_logo.svg</file>
+        <file>scalable/instances/modrinth.svg</file>
+        <file>scalable/instances/quiltmc.svg</file>
+        <file>scalable/instances/fabricmc.svg</file>
+        <file>scalable/instances/neoforged.svg</file>
+
+        <!-- Launcher branding -->
+        <file>scalable/instances/launcher.svg</file>
+
+        <!-- Java provider icons (functional) -->
+        <file>scalable/adoptium.svg</file>
+        <file>scalable/azul.svg</file>
+        <file>scalable/mojang.svg</file>
+        <file>scalable/openj9_hex_custom.svg</file>
+
+        <!-- Worlds folder -->
+        <file>16x16/worlds.png</file>
+        <file>22x22/worlds.png</file>
+        <file>32x32/worlds.png</file>
+        <file>48x48/worlds.png</file>
+        <file>64x64/worlds.png</file>
+
+        <!-- Star -->
+        <file>16x16/star.png</file>
+        <file>24x24/star.png</file>
+        <file>32x32/star.png</file>
+        <file>48x48/star.png</file>
+        <file>64x64/star.png</file>
+    </qresource>
+</RCC>

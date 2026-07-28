@@ -1,0 +1,111 @@
+/* Copyright 2015-2021 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include "BaseInstance.h"
+#include "minecraft/World.h"
+#include <QAbstractListModel>
+#include <QDir>
+#include <QList>
+#include <QMimeData>
+#include <QString>
+
+class QFileSystemWatcher;
+
+class WorldList : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    enum Columns
+    {
+        NameColumn,
+        GameModeColumn,
+        LastPlayedColumn,
+        SizeColumn,
+        InfoColumn
+    };
+
+    enum Roles
+    {
+        ObjectRole = Qt::UserRole + 1,
+        FolderRole,
+        SeedRole,
+        NameRole,
+        GameModeRole,
+        LastPlayedRole,
+        SizeRole,
+        IconFileRole
+    };
+
+    WorldList(const QString& dir, BaseInstance* instance);
+
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+
+    virtual int      rowCount(const QModelIndex& parent = QModelIndex()) const { return parent.isValid() ? 0 : static_cast<int>(size()); };
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual int      columnCount(const QModelIndex& parent) const;
+
+    size_t size() const { return m_worlds.size(); };
+    bool   empty() const { return size() == 0; }
+    World& operator[](size_t index) { return m_worlds[index]; }
+
+    virtual bool update();
+
+    void installWorld(QFileInfo filename);
+
+    virtual bool deleteWorld(int index);
+
+    virtual bool resetIcon(int index);
+
+    virtual bool deleteWorlds(int first, int last);
+
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+
+    virtual QMimeData* mimeData(const QModelIndexList& indexes) const;
+
+    virtual QStringList mimeTypes() const;
+
+    virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+
+    virtual Qt::DropActions supportedDragActions() const;
+
+    virtual Qt::DropActions supportedDropActions() const;
+
+    void startWatching();
+    void stopWatching();
+
+    virtual bool isValid();
+
+    QDir dir() const { return m_dir; }
+
+    QString instDirPath() const;
+
+    const QList<World>& allWorlds() const { return m_worlds; }
+
+private slots:
+    void directoryChanged(QString path);
+    void loadWorldsAsync();
+
+signals:
+    void changed();
+
+protected:
+    BaseInstance*       m_instance;
+    QFileSystemWatcher* m_watcher;
+    bool                m_isWatching;
+    QDir                m_dir;
+    QList<World>        m_worlds;
+};

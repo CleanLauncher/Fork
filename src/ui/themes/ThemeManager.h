@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher: Minecraft Launcher
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <QDir>
+#include <QLoggingCategory>
+#include <QString>
+#include <memory>
+
+#include "IconTheme.h"
+#include "ui/themes/ITheme.h"
+
+inline auto themeDebugLog() { return qDebug() << "[Theme]"; }
+inline auto themeWarningLog() { return qWarning() << "[Theme]"; }
+
+class ThemeManager {
+  public:
+    ThemeManager();
+    ~ThemeManager();
+
+    QList<IconTheme *> getValidIconThemes();
+    QList<ITheme *> getValidApplicationThemes();
+    bool isValidIconTheme(const QString &id);
+    bool isValidApplicationTheme(const QString &id);
+    QDir getIconThemesFolder();
+    QDir getApplicationThemesFolder();
+    void applyCurrentlySelectedTheme(bool initial = false);
+    void setIconTheme(const QString &name);
+    void setApplicationTheme(const QString &name, bool initial = false);
+
+    const LogColors &getLogColors() { return m_logColors; }
+
+    void refresh();
+
+  private:
+    std::map<QString, std::unique_ptr<ITheme>> m_themes;
+    std::map<QString, IconTheme> m_icons;
+    QDir m_iconThemeFolder{"iconthemes"};
+    QDir m_applicationThemeFolder{"themes"};
+    QPalette m_defaultPalette;
+    QString m_defaultStyle;
+    LogColors m_logColors;
+
+    void initializeThemes();
+    QString addTheme(std::unique_ptr<ITheme> theme);
+    ITheme *getTheme(QString themeId);
+    QString addIconTheme(IconTheme theme);
+    void initializeIcons();
+    void initializeWidgets();
+
+    void setTitlebarColorOnMac(WId windowId, QColor color);
+
+    void setTitlebarColorOfAllWindowsOnMac(QColor color);
+
+    void stopSettingNewWindowColorsOnMac();
+#ifdef Q_OS_MACOS
+    NSObject *m_windowTitlebarObserver = nullptr;
+#endif
+
+    const QStringList builtinIcons{"breeze_dark", "breeze_light"};
+};

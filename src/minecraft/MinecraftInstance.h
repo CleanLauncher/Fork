@@ -1,0 +1,161 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher: Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
+#pragma once
+#include "BaseInstance.h"
+#include "minecraft/launch/MinecraftTarget.h"
+#include "minecraft/mod/Mod.h"
+#include <QDir>
+#include <QProcess>
+#include <java/JavaVersion.h>
+#include <minecraft/mod/DataPackFolderModel.h>
+
+class ModFolderModel;
+class ResourceFolderModel;
+class ResourcePackFolderModel;
+class ShaderPackFolderModel;
+class TexturePackFolderModel;
+class WorldList;
+class LaunchStep;
+class LaunchProfile;
+class PackProfile;
+
+class MinecraftInstance : public BaseInstance
+{
+    Q_OBJECT
+public:
+    MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
+    virtual ~MinecraftInstance();
+    virtual void saveNow() override;
+
+    void loadSpecificSettings() override;
+
+    QString typeName() const override;
+
+    QSet<QString> traits() const override;
+
+    bool canEdit() const override { return true; }
+
+    bool canExport() const override { return true; }
+
+    void populateLaunchMenu(QMenu* menu) override;
+
+    QString jarModsDir() const;
+    QString resourcePacksDir() const;
+    QString texturePacksDir() const;
+    QString shaderPacksDir() const;
+    QString modsRoot() const override;
+    QString coreModsDir() const;
+    QString nilModsDir() const;
+    QString dataPacksDir();
+    QString modsCacheLocation() const;
+    QString libDir() const;
+    QString worldDir() const;
+    QString resourcesDir() const;
+    QDir    jarmodsPath() const;
+    QDir    librariesPath() const;
+    QDir    versionsPath() const;
+    QString instanceConfigFolder() const override;
+
+    QString gameRoot() const override;
+
+    QString binRoot() const;
+
+    QString getNativePath() const;
+
+    QString getLocalLibraryPath() const;
+
+    bool supportsDemo() const;
+
+    void updateRuntimeContext() override;
+
+    PackProfile* getPackProfile() const;
+
+    ModFolderModel*             loaderModList();
+    ModFolderModel*             coreModList();
+    ModFolderModel*             nilModList();
+    ResourcePackFolderModel*    resourcePackList();
+    TexturePackFolderModel*     texturePackList();
+    ShaderPackFolderModel*      shaderPackList();
+    DataPackFolderModel*        dataPackList();
+    QList<ResourceFolderModel*> resourceLists();
+    WorldList*                  worldList();
+
+    QList<Task::Ptr> createUpdateTask() override;
+    LaunchTask*      createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) override;
+    QStringList      extraArguments() override;
+    QStringList      verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override;
+    QList<Mod*>      getJarMods() const;
+    QString          createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin);
+
+    QStringList javaArguments();
+    QString     getLauncher();
+    bool        shouldApplyOnlineFixes();
+
+    QMap<QString, QString> getVariables() override;
+
+    QProcessEnvironment createEnvironment() override;
+    QProcessEnvironment createLaunchEnvironment() override;
+
+    QStringList getLogFileSearchPaths() override;
+
+    QString getStatusbarDescription() override;
+
+    virtual QStringList getClassPath();
+
+    virtual QStringList getNativeJars();
+
+    virtual QString getMainClass() const;
+
+    virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) const;
+
+    virtual JavaVersion getJavaVersion();
+
+protected:
+    QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
+    QMap<QString, QString> makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const;
+
+protected:
+    std::unique_ptr<PackProfile>             m_components;
+    std::unique_ptr<ModFolderModel>          m_loader_mod_list;
+    std::unique_ptr<ModFolderModel>          m_core_mod_list;
+    std::unique_ptr<ModFolderModel>          m_nil_mod_list;
+    std::unique_ptr<ResourcePackFolderModel> m_resource_pack_list;
+    std::unique_ptr<ShaderPackFolderModel>   m_shader_pack_list;
+    std::unique_ptr<TexturePackFolderModel>  m_texture_pack_list;
+    std::unique_ptr<DataPackFolderModel>     m_data_pack_list;
+    std::unique_ptr<WorldList>               m_world_list;
+};
