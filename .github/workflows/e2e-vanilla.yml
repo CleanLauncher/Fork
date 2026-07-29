@@ -16,5 +16,5 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Run Vanilla tests
-        run: cargo test --test instance_tests test_create_vanilla_instance
+        run: cargo test test_vanilla
         working-directory: crates

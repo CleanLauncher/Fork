@@ -16,5 +16,5 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Run Tekkit tests
-        run: cargo test --test instance_tests test_create_tekkit_instance
+        run: cargo test test_tekkit
         working-directory: crates

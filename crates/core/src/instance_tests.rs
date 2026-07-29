@@ -1,5 +1,4 @@
-extern crate core as launcher_core;
-use launcher_core::ffi::instance_generator::{create_instance, InstanceConfig, InstanceType};
+use crate::ffi::instance_generator::{create_instance, InstanceConfig, InstanceType};
 use std::fs;
 use std::path::Path;
 
