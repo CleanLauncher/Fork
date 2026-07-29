@@ -14,7 +14,7 @@ Use `: ` instead of ` — ` in documentation and comments. Example: `CoreError: 
 
 ## Project layout (C++ standard)
 
-`src/` for main C++ application source. `libraries/` for helper libraries and submodules. `crates/` for the Rust core library (name is `crates`, NOT `launcher-core`). `res/` for resources like icons, desktop files, and config. `cmake/` for CMake modules. `buildconfig/` for build configuration. `tests/` for test files. `flatpak/` and `snap/` for packaging manifests.
+`src/` for main C++ application source. `libraries/` for helper libraries and submodules. `crates/` for the Rust core library (name is `crates`, NOT `launcher-core`). `res/` for resources like icons, desktop files, and config. `cmake/` for CMake modules. `config/` for build configuration. `tests/` for test files. `flatpak/` and `snap/` for packaging manifests.
 
 ## Data vs code separation
 

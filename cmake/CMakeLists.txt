@@ -509,7 +509,7 @@ add_subdirectory(crates) # Rust core library
 
 # Built Artifacts
 
-add_subdirectory(buildconfig)
+add_subdirectory(config)
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
