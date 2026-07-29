@@ -1,6 +1,7 @@
 # Developer Guidelines
 
 ## Commit Rules
+
 - Commits must be highly granular.
 - The word 'and' is FORBIDDEN.
 - Numbers are FORBIDDEN.

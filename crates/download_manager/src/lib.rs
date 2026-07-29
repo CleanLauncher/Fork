@@ -7,7 +7,6 @@ pub use models::{DownloadStatus, DownloadTask};
 pub use utils::verify_file_hash;
 
 use core::Downloader;
-use models::DownloadTask;
 
 pub async fn download_file(task: &DownloadTask) -> Result<(), String> {
     log::info!("Starting download for {}", task.url);

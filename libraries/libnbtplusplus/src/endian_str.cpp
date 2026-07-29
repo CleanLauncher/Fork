@@ -182,7 +182,7 @@ void write_little(std::ostream& os, uint8_t x)
 
 void write_little(std::ostream& os, uint16_t x)
 {
-    uint8_t tmp[2] {
+    const uint8_t tmp[2] {
         uint8_t(x),
         uint8_t(x >> 8)};
     os.write(reinterpret_cast<const char*>(tmp), 2);
@@ -190,7 +190,7 @@ void write_little(std::ostream& os, uint16_t x)
 
 void write_little(std::ostream& os, uint32_t x)
 {
-    uint8_t tmp[4] {
+    const uint8_t tmp[4] {
         uint8_t(x),
         uint8_t(x >> 8),
         uint8_t(x >> 16),
@@ -200,7 +200,7 @@ void write_little(std::ostream& os, uint32_t x)
 
 void write_little(std::ostream& os, uint64_t x)
 {
-    uint8_t tmp[8] {
+    const uint8_t tmp[8] {
         uint8_t(x),
         uint8_t(x >> 8),
         uint8_t(x >> 16),
@@ -236,7 +236,7 @@ void write_big(std::ostream& os, uint8_t x)
 
 void write_big(std::ostream& os, uint16_t x)
 {
-    uint8_t tmp[2] {
+    const uint8_t tmp[2] {
         uint8_t(x >> 8),
         uint8_t(x)};
     os.write(reinterpret_cast<const char*>(tmp), 2);
@@ -244,7 +244,7 @@ void write_big(std::ostream& os, uint16_t x)
 
 void write_big(std::ostream& os, uint32_t x)
 {
-    uint8_t tmp[4] {
+    const uint8_t tmp[4] {
         uint8_t(x >> 24),
         uint8_t(x >> 16),
         uint8_t(x >> 8),
@@ -254,7 +254,7 @@ void write_big(std::ostream& os, uint32_t x)
 
 void write_big(std::ostream& os, uint64_t x)
 {
-    uint8_t tmp[8] {
+    const uint8_t tmp[8] {
         uint8_t(x >> 56),
         uint8_t(x >> 48),
         uint8_t(x >> 40),

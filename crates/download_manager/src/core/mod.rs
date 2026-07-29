@@ -1,4 +1,4 @@
-use crate::models::{DownloadStatus, DownloadTask};
+use crate::models::DownloadTask;
 use reqwest::Client;
 use std::fs::File;
 use std::io::Write;
