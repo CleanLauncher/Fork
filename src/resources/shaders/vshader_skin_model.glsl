@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 // https://code.qt.io/cgit/qt/qtbase.git/tree/examples/opengl/cube/vshader.glsl
 
-// Dylan Schooner - 2025
+// Dylan Schooner: 2025
 // Modification: Implemented final Z-NDC re-inversion to compensate
 // for rigid OpenGL 2.0 context forcing glClearDepth(1.0).
 // This flips the high-precision Reverse Z output to the standard [0, W] range.
