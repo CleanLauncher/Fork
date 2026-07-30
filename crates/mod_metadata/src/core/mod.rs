@@ -235,7 +235,11 @@ pub struct ModVersion {
 pub fn parse_modrinth_project(json: &str) -> Result<ModProject> {
     let raw: serde_json::Value = serde_json::from_str(json).map_err(CoreError::Json)?;
 
-    let project_id = raw["id"].as_str().or_else(|| raw["project_id"].as_str()).unwrap_or("").to_string();
+    let project_id = raw["id"]
+        .as_str()
+        .or_else(|| raw["project_id"].as_str())
+        .unwrap_or("")
+        .to_string();
 
     let authors = extract_modrinth_authors(&raw);
 
@@ -269,7 +273,10 @@ pub fn parse_modrinth_project(json: &str) -> Result<ModProject> {
         slug: raw["slug"].as_str().unwrap_or("").to_string(),
         description: raw["description"].as_str().unwrap_or("").to_string(),
         logo_url: raw["icon_url"].as_str().unwrap_or("").to_string(),
-        website_url: format!("https://modrinth.com/mod/{}", raw["slug"].as_str().unwrap_or("")),
+        website_url: format!(
+            "https://modrinth.com/mod/{}",
+            raw["slug"].as_str().unwrap_or("")
+        ),
         authors,
         client_side,
         server_side,
@@ -285,12 +292,20 @@ pub fn parse_modrinth_version(json: &str) -> Result<ModVersion> {
 
     let loaders: Vec<ModLoader> = raw["loaders"]
         .as_array()
-        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(ModLoader::from_modrinth)).collect())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(ModLoader::from_modrinth))
+                .collect()
+        })
         .unwrap_or_default();
 
     let game_versions: Vec<String> = raw["game_versions"]
         .as_array()
-        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(String::from)).collect())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(String::from))
+                .collect()
+        })
         .unwrap_or_default();
 
     let hash = raw["files"]
@@ -387,7 +402,11 @@ pub fn parse_curseforge_project(json: &str) -> Result<ModProject> {
 
     let logo_url = raw["logo"]
         .as_object()
-        .and_then(|logo| logo.get("thumbnailUrl").or_else(|| logo.get("url")).and_then(|v| v.as_str()))
+        .and_then(|logo| {
+            logo.get("thumbnailUrl")
+                .or_else(|| logo.get("url"))
+                .and_then(|v| v.as_str())
+        })
         .unwrap_or("")
         .to_string();
 
@@ -453,21 +472,27 @@ pub fn parse_curseforge_version(json: &str) -> Result<ModVersion> {
         }
     }
 
-    let hash = raw["hashes"].as_array().and_then(|hashes| hashes.first()).map(|h| ModHash {
-        hash_type: match h["algo"].as_i64().unwrap_or(0) {
-            1 => "sha1".to_string(),
-            2 => "sha256".to_string(),
-            _ => "md5".to_string(),
-        },
-        hash: h["value"].as_str().unwrap_or("").to_string(),
-    });
+    let hash = raw["hashes"]
+        .as_array()
+        .and_then(|hashes| hashes.first())
+        .map(|h| ModHash {
+            hash_type: match h["algo"].as_i64().unwrap_or(0) {
+                1 => "sha1".to_string(),
+                2 => "sha256".to_string(),
+                _ => "md5".to_string(),
+            },
+            hash: h["value"].as_str().unwrap_or("").to_string(),
+        });
 
     let dependencies = raw["dependencies"]
         .as_array()
         .map(|arr| {
             arr.iter()
                 .map(|d| ModDependency {
-                    project_id: d["modId"].as_i64().map(|v| v.to_string()).unwrap_or_default(),
+                    project_id: d["modId"]
+                        .as_i64()
+                        .map(|v| v.to_string())
+                        .unwrap_or_default(),
                     version_id: String::new(),
                     file_name: String::new(),
                     dep_type: d["relationType"]
@@ -540,13 +565,20 @@ fn extract_modrinth_authors(raw: &serde_json::Value) -> Vec<ModAuthor> {
     Vec::new()
 }
 
-pub fn filter_versions_by_loaders(versions: &[ModVersion], required_loaders: &[ModLoader]) -> Vec<ModVersion> {
+pub fn filter_versions_by_loaders(
+    versions: &[ModVersion],
+    required_loaders: &[ModLoader],
+) -> Vec<ModVersion> {
     if required_loaders.is_empty() {
         return versions.to_vec();
     }
     versions
         .iter()
-        .filter(|v| required_loaders.iter().any(|loader| v.loaders.contains(loader)))
+        .filter(|v| {
+            required_loaders
+                .iter()
+                .any(|loader| v.loaders.contains(loader))
+        })
         .cloned()
         .collect()
 }
@@ -589,14 +621,26 @@ mod tests {
         assert_eq!(DependencyType::from_curseforge(2), DependencyType::Optional);
         assert_eq!(DependencyType::from_curseforge(3), DependencyType::Required);
         assert_eq!(DependencyType::from_curseforge(4), DependencyType::Tool);
-        assert_eq!(DependencyType::from_curseforge(5), DependencyType::Incompatible);
+        assert_eq!(
+            DependencyType::from_curseforge(5),
+            DependencyType::Incompatible
+        );
     }
 
     #[test]
     fn test_dependency_type_modrinth() {
-        assert_eq!(DependencyType::from_modrinth("required"), DependencyType::Required);
-        assert_eq!(DependencyType::from_modrinth("optional"), DependencyType::Optional);
-        assert_eq!(DependencyType::from_modrinth("incompatible"), DependencyType::Incompatible);
+        assert_eq!(
+            DependencyType::from_modrinth("required"),
+            DependencyType::Required
+        );
+        assert_eq!(
+            DependencyType::from_modrinth("optional"),
+            DependencyType::Optional
+        );
+        assert_eq!(
+            DependencyType::from_modrinth("incompatible"),
+            DependencyType::Incompatible
+        );
     }
 
     #[test]

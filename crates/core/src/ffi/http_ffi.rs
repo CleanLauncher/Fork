@@ -28,7 +28,11 @@ pub extern "C" fn launcher_http_set_header(name_ptr: *const c_char, value_ptr: *
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_http_get(url_ptr: *const c_char, out_status: *mut u16, out_len: *mut usize) -> *mut u8 {
+pub extern "C" fn launcher_http_get(
+    url_ptr: *const c_char,
+    out_status: *mut u16,
+    out_len: *mut usize,
+) -> *mut u8 {
     ffi_null_check!(url_ptr, out_status, out_len);
     let url = ffi_cstr_to_str!(url_ptr);
     match http_client::get(url) {
@@ -43,7 +47,11 @@ pub extern "C" fn launcher_http_get(url_ptr: *const c_char, out_status: *mut u16
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_http_get_file(url_ptr: *const c_char, path_ptr: *const c_char, out_status: *mut u16) -> bool {
+pub extern "C" fn launcher_http_get_file(
+    url_ptr: *const c_char,
+    path_ptr: *const c_char,
+    out_status: *mut u16,
+) -> bool {
     ffi_false_check!(url_ptr, path_ptr);
     let url = ffi_cstr_to_str_false!(url_ptr);
     let path = ffi_cstr_to_str_false!(path_ptr);
@@ -69,7 +77,11 @@ pub extern "C" fn launcher_http_get_file_resume(
     ffi_false_check!(url_ptr, path_ptr);
     let url = ffi_cstr_to_str_false!(url_ptr);
     let path = ffi_cstr_to_str_false!(path_ptr);
-    let retries = if max_retries == 0 { None } else { Some(max_retries) };
+    let retries = if max_retries == 0 {
+        None
+    } else {
+        Some(max_retries)
+    };
     match http_client::download_to_file_with_resume(url, path, existing_bytes, retries) {
         Ok(result) => {
             unsafe {

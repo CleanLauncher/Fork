@@ -4,7 +4,11 @@ use std::os::raw::c_char;
 use std::slice;
 
 #[no_mangle]
-pub extern "C" fn gzip_unzip(compressed_ptr: *const u8, compressed_len: usize, output_length: *mut usize) -> *mut u8 {
+pub extern "C" fn gzip_unzip(
+    compressed_ptr: *const u8,
+    compressed_len: usize,
+    output_length: *mut usize,
+) -> *mut u8 {
     ffi_null_check!(compressed_ptr, output_length);
     let input_bytes = unsafe { slice::from_raw_parts(compressed_ptr, compressed_len) };
     match gzip::unzip(input_bytes) {
@@ -14,7 +18,11 @@ pub extern "C" fn gzip_unzip(compressed_ptr: *const u8, compressed_len: usize, o
 }
 
 #[no_mangle]
-pub extern "C" fn gzip_zip(uncompressed_ptr: *const u8, uncompressed_len: usize, output_length: *mut usize) -> *mut u8 {
+pub extern "C" fn gzip_zip(
+    uncompressed_ptr: *const u8,
+    uncompressed_len: usize,
+    output_length: *mut usize,
+) -> *mut u8 {
     ffi_null_check!(uncompressed_ptr, output_length);
     let input_bytes = unsafe { slice::from_raw_parts(uncompressed_ptr, uncompressed_len) };
     match gzip::zip(input_bytes) {

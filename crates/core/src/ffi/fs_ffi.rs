@@ -14,7 +14,11 @@ pub extern "C" fn launcher_fs_read(path_ptr: *const c_char, output_length: *mut 
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_fs_write(path_ptr: *const c_char, data_ptr: *const u8, data_len: usize) -> bool {
+pub extern "C" fn launcher_fs_write(
+    path_ptr: *const c_char,
+    data_ptr: *const u8,
+    data_len: usize,
+) -> bool {
     ffi_false_check!(path_ptr, data_ptr);
     let path_text = ffi_cstr_to_str_false!(path_ptr);
     let input_bytes = unsafe { slice::from_raw_parts(data_ptr, data_len) };
@@ -29,9 +33,13 @@ pub extern "C" fn launcher_fs_delete_path(path_ptr: *const c_char) -> bool {
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_fs_remove_invalid_filename_chars(input_ptr: *const c_char, replace_with: c_char) -> *mut c_char {
+pub extern "C" fn launcher_fs_remove_invalid_filename_chars(
+    input_ptr: *const c_char,
+    replace_with: c_char,
+) -> *mut c_char {
     ffi_null_check!(input_ptr);
     let input_text = ffi_cstr_to_str!(input_ptr);
-    let sanitized = filesystem::remove_invalid_filename_chars(input_text, replace_with as u8 as char);
+    let sanitized =
+        filesystem::remove_invalid_filename_chars(input_text, replace_with as u8 as char);
     ffi_cstring_to_raw!(sanitized)
 }

@@ -11,7 +11,10 @@ pub struct DownloadTask {
 #[derive(Debug, Clone)]
 pub enum DownloadStatus {
     Pending,
-    Downloading { bytes_downloaded: u64, total_bytes: Option<u64> },
+    Downloading {
+        bytes_downloaded: u64,
+        total_bytes: Option<u64>,
+    },
     Hashing,
     Completed,
     Failed(String),

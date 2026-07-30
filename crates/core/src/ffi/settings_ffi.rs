@@ -38,7 +38,10 @@ pub extern "C" fn launcher_settings_save(ptr: *mut settings::SettingsStore) -> b
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_get_string(ptr: *const settings::SettingsStore, key_ptr: *const c_char) -> *mut c_char {
+pub extern "C" fn launcher_settings_get_string(
+    ptr: *const settings::SettingsStore,
+    key_ptr: *const c_char,
+) -> *mut c_char {
     ffi_null_check!(key_ptr);
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -53,7 +56,10 @@ pub extern "C" fn launcher_settings_get_string(ptr: *const settings::SettingsSto
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_get_int(ptr: *const settings::SettingsStore, key_ptr: *const c_char) -> i64 {
+pub extern "C" fn launcher_settings_get_int(
+    ptr: *const settings::SettingsStore,
+    key_ptr: *const c_char,
+) -> i64 {
     if key_ptr.is_null() {
         return 0;
     }
@@ -69,7 +75,10 @@ pub extern "C" fn launcher_settings_get_int(ptr: *const settings::SettingsStore,
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_get_bool(ptr: *const settings::SettingsStore, key_ptr: *const c_char) -> bool {
+pub extern "C" fn launcher_settings_get_bool(
+    ptr: *const settings::SettingsStore,
+    key_ptr: *const c_char,
+) -> bool {
     if key_ptr.is_null() {
         return false;
     }
@@ -82,7 +91,11 @@ pub extern "C" fn launcher_settings_get_bool(ptr: *const settings::SettingsStore
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_set_string(ptr: *mut settings::SettingsStore, key_ptr: *const c_char, value_ptr: *const c_char) {
+pub extern "C" fn launcher_settings_set_string(
+    ptr: *mut settings::SettingsStore,
+    key_ptr: *const c_char,
+    value_ptr: *const c_char,
+) {
     if ptr.is_null() || key_ptr.is_null() || value_ptr.is_null() {
         return;
     }
@@ -93,7 +106,11 @@ pub extern "C" fn launcher_settings_set_string(ptr: *mut settings::SettingsStore
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_set_int(ptr: *mut settings::SettingsStore, key_ptr: *const c_char, value: i64) {
+pub extern "C" fn launcher_settings_set_int(
+    ptr: *mut settings::SettingsStore,
+    key_ptr: *const c_char,
+    value: i64,
+) {
     if ptr.is_null() || key_ptr.is_null() {
         return;
     }
@@ -103,7 +120,11 @@ pub extern "C" fn launcher_settings_set_int(ptr: *mut settings::SettingsStore, k
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_set_bool(ptr: *mut settings::SettingsStore, key_ptr: *const c_char, value: bool) {
+pub extern "C" fn launcher_settings_set_bool(
+    ptr: *mut settings::SettingsStore,
+    key_ptr: *const c_char,
+    value: bool,
+) {
     if ptr.is_null() || key_ptr.is_null() {
         return;
     }
@@ -113,7 +134,10 @@ pub extern "C" fn launcher_settings_set_bool(ptr: *mut settings::SettingsStore, 
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_reset(ptr: *mut settings::SettingsStore, key_ptr: *const c_char) {
+pub extern "C" fn launcher_settings_reset(
+    ptr: *mut settings::SettingsStore,
+    key_ptr: *const c_char,
+) {
     if ptr.is_null() || key_ptr.is_null() {
         return;
     }
@@ -123,7 +147,10 @@ pub extern "C" fn launcher_settings_reset(ptr: *mut settings::SettingsStore, key
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_contains(ptr: *const settings::SettingsStore, key_ptr: *const c_char) -> bool {
+pub extern "C" fn launcher_settings_contains(
+    ptr: *const settings::SettingsStore,
+    key_ptr: *const c_char,
+) -> bool {
     ffi_false_check!(key_ptr);
     if ptr.is_null() {
         return false;
@@ -134,7 +161,11 @@ pub extern "C" fn launcher_settings_contains(ptr: *const settings::SettingsStore
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_register_default(ptr: *mut settings::SettingsStore, key_ptr: *const c_char, value_ptr: *const c_char) {
+pub extern "C" fn launcher_settings_register_default(
+    ptr: *mut settings::SettingsStore,
+    key_ptr: *const c_char,
+    value_ptr: *const c_char,
+) {
     if ptr.is_null() || key_ptr.is_null() || value_ptr.is_null() {
         return;
     }
@@ -169,7 +200,10 @@ pub extern "C" fn launcher_settings_is_dirty(ptr: *const settings::SettingsStore
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_settings_keys(ptr: *const settings::SettingsStore, out_count: *mut usize) -> *mut *mut c_char {
+pub extern "C" fn launcher_settings_keys(
+    ptr: *const settings::SettingsStore,
+    out_count: *mut usize,
+) -> *mut *mut c_char {
     ffi_null_check!(out_count);
     if ptr.is_null() {
         unsafe {

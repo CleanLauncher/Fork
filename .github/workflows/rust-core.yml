@@ -106,6 +106,71 @@ jobs:
         run: cargo test --release
         working-directory: crates
 
+  rust-doc:
+    name: rust-doc
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            crates/target
+          key: ${{ runner.os }}-cargo-doc-${{ hashFiles('crates/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-doc-
+
+      - name: Build documentation
+        run: cargo doc --no-deps --all-features
+        working-directory: crates
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+  rust-audit:
+    name: rust-audit
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+
+      - name: Cache cargo
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            crates/target
+          key: ${{ runner.os }}-cargo-audit-${{ hashFiles('crates/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-audit-
+
+      - name: Security audit
+        run: cargo audit
+        working-directory: crates
+
   rust-miri:
     name: rust-miri
     runs-on: ubuntu-24.04
@@ -135,4 +200,50 @@ jobs:
 
       - name: Miri test
         run: cargo miri test
+        working-directory: crates
+
+  rust-outdated:
+    name: rust-outdated
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-outdated
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-outdated
+
+      - name: Check outdated dependencies
+        run: cargo outdated --exit-code 1 || true
+        working-directory: crates
+
+  rust-unused-deps:
+    name: rust-unused-deps
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-udeps
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-udeps
+
+      - name: Check unused dependencies
+        run: cargo udeps
         working-directory: crates

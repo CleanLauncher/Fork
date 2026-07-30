@@ -35,7 +35,11 @@ pub extern "C" fn launcher_hash_sha256_file(path_ptr: *const c_char) -> *mut c_c
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_verify_sha256(data_ptr: *const u8, data_len: usize, expected_ptr: *const c_char) -> bool {
+pub extern "C" fn launcher_verify_sha256(
+    data_ptr: *const u8,
+    data_len: usize,
+    expected_ptr: *const c_char,
+) -> bool {
     ffi_false_check!(data_ptr, expected_ptr);
     let input_bytes = unsafe { slice::from_raw_parts(data_ptr, data_len) };
     let expected = ffi_cstr_to_str_false!(expected_ptr);

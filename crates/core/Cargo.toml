@@ -11,13 +11,18 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 error = { path = "../error" }
 archive = { path = "../archive" }
+auth = { path = "../auth" }
+download_manager = { path = "../download_manager" }
 filesystem = { path = "../filesystem" }
 gzip = { path = "../gzip" }
 hashing = { path = "../hashing" }
 http_client = { path = "../http_client" }
+instance_manager = { path = "../instance_manager" }
 json = { path = "../json" }
+launcher_api = { path = "../launcher_api" }
 markdown = { path = "../markdown" }
 mod_metadata = { path = "../mod_metadata" }
+process_launcher = { path = "../process_launcher" }
 serde_json = "1"
 settings = { path = "../settings" }
 string_utils = { path = "../string_utils" }
@@ -25,5 +30,3 @@ cxx = "1.0.198"
 
 [build-dependencies]
 cxx-build = "1.0.198"
-process_launcher = { path = "../process_launcher" }
-download_manager = { path = "../download_manager" }

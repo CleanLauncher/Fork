@@ -18,17 +18,31 @@ macro_rules! generate_instance_test {
             create_instance(base_path, instance_name, config).unwrap();
 
             let config_path = base_path.join(instance_name).join("instance.cfg");
-            assert!(config_path.exists(), "Config path does not exist for {}", instance_name);
+            assert!(
+                config_path.exists(),
+                "Config path does not exist for {}",
+                instance_name
+            );
 
             let content = fs::read_to_string(&config_path).unwrap();
-            assert!(content.contains($type_str), "Missing type {} in {}", $type_str, instance_name);
+            assert!(
+                content.contains($type_str),
+                "Missing type {} in {}",
+                $type_str,
+                instance_name
+            );
             assert!(
                 content.contains($version),
                 "Missing version {} in {}",
                 $version,
                 instance_name
             );
-            assert!(content.contains($key_str), "Missing key {} in {}", $key_str, instance_name);
+            assert!(
+                content.contains($key_str),
+                "Missing key {} in {}",
+                $key_str,
+                instance_name
+            );
         }
     };
 }
@@ -99,7 +113,14 @@ generate_instance_test!(
     "1.12.2",
     "Version"
 );
-generate_instance_test!(test_vanilla_1_8_9, InstanceType::Vanilla, "Vanilla", "vanilla", "1.8.9", "Version");
+generate_instance_test!(
+    test_vanilla_1_8_9,
+    InstanceType::Vanilla,
+    "Vanilla",
+    "vanilla",
+    "1.8.9",
+    "Version"
+);
 generate_instance_test!(
     test_vanilla_1_7_10,
     InstanceType::Vanilla,
@@ -110,13 +131,62 @@ generate_instance_test!(
 );
 
 // Forge versions
-generate_instance_test!(test_forge_1_19_2, InstanceType::Forge, "Forge", "forge", "43.2.0", "Version");
-generate_instance_test!(test_forge_1_18_2, InstanceType::Forge, "Forge", "forge", "40.1.0", "Version");
-generate_instance_test!(test_forge_1_16_5, InstanceType::Forge, "Forge", "forge", "36.2.39", "Version");
-generate_instance_test!(test_forge_1_12_2, InstanceType::Forge, "Forge", "forge", "14.23.5.2859", "Version");
-generate_instance_test!(test_forge_1_8_9, InstanceType::Forge, "Forge", "forge", "11.15.1.2318", "Version");
-generate_instance_test!(test_forge_1_7_10, InstanceType::Forge, "Forge", "forge", "10.13.4.1614", "Version");
-generate_instance_test!(test_forge_latest, InstanceType::Forge, "Forge", "forge", "latest", "Version");
+generate_instance_test!(
+    test_forge_1_19_2,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "43.2.0",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_1_18_2,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "40.1.0",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_1_16_5,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "36.2.39",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_1_12_2,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "14.23.5.2859",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_1_8_9,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "11.15.1.2318",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_1_7_10,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "10.13.4.1614",
+    "Version"
+);
+generate_instance_test!(
+    test_forge_latest,
+    InstanceType::Forge,
+    "Forge",
+    "forge",
+    "latest",
+    "Version"
+);
 generate_instance_test!(
     test_forge_recommended,
     InstanceType::Forge,
@@ -127,17 +197,80 @@ generate_instance_test!(
 );
 
 // Fabric versions
-generate_instance_test!(test_fabric_1_20, InstanceType::Fabric, "Fabric", "fabric", "0.14.21", "Version");
-generate_instance_test!(test_fabric_1_19_4, InstanceType::Fabric, "Fabric", "fabric", "0.14.19", "Version");
-generate_instance_test!(test_fabric_1_19_2, InstanceType::Fabric, "Fabric", "fabric", "0.14.9", "Version");
-generate_instance_test!(test_fabric_1_18_2, InstanceType::Fabric, "Fabric", "fabric", "0.13.3", "Version");
-generate_instance_test!(test_fabric_1_17_1, InstanceType::Fabric, "Fabric", "fabric", "0.11.7", "Version");
-generate_instance_test!(test_fabric_1_16_5, InstanceType::Fabric, "Fabric", "fabric", "0.11.3", "Version");
+generate_instance_test!(
+    test_fabric_1_20,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.14.21",
+    "Version"
+);
+generate_instance_test!(
+    test_fabric_1_19_4,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.14.19",
+    "Version"
+);
+generate_instance_test!(
+    test_fabric_1_19_2,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.14.9",
+    "Version"
+);
+generate_instance_test!(
+    test_fabric_1_18_2,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.13.3",
+    "Version"
+);
+generate_instance_test!(
+    test_fabric_1_17_1,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.11.7",
+    "Version"
+);
+generate_instance_test!(
+    test_fabric_1_16_5,
+    InstanceType::Fabric,
+    "Fabric",
+    "fabric",
+    "0.11.3",
+    "Version"
+);
 
 // Quilt versions
-generate_instance_test!(test_quilt_1_20, InstanceType::Quilt, "Quilt", "quilt", "0.19.0", "Version");
-generate_instance_test!(test_quilt_1_19_2, InstanceType::Quilt, "Quilt", "quilt", "0.18.1", "Version");
-generate_instance_test!(test_quilt_1_18_2, InstanceType::Quilt, "Quilt", "quilt", "0.17.0", "Version");
+generate_instance_test!(
+    test_quilt_1_20,
+    InstanceType::Quilt,
+    "Quilt",
+    "quilt",
+    "0.19.0",
+    "Version"
+);
+generate_instance_test!(
+    test_quilt_1_19_2,
+    InstanceType::Quilt,
+    "Quilt",
+    "quilt",
+    "0.18.1",
+    "Version"
+);
+generate_instance_test!(
+    test_quilt_1_18_2,
+    InstanceType::Quilt,
+    "Quilt",
+    "quilt",
+    "0.17.0",
+    "Version"
+);
 
 // LiteLoader versions
 generate_instance_test!(
@@ -158,8 +291,22 @@ generate_instance_test!(
 );
 
 // FTB Modpacks
-generate_instance_test!(test_ftb_direwolf20, InstanceType::FTB, "FTB", "ftb", "Direwolf20", "Modpack");
-generate_instance_test!(test_ftb_revelation, InstanceType::FTB, "FTB", "ftb", "FTB_Revelation", "Modpack");
+generate_instance_test!(
+    test_ftb_direwolf20,
+    InstanceType::FTB,
+    "FTB",
+    "ftb",
+    "Direwolf20",
+    "Modpack"
+);
+generate_instance_test!(
+    test_ftb_revelation,
+    InstanceType::FTB,
+    "FTB",
+    "ftb",
+    "FTB_Revelation",
+    "Modpack"
+);
 generate_instance_test!(
     test_ftb_interactions,
     InstanceType::FTB,
@@ -168,7 +315,14 @@ generate_instance_test!(
     "FTB_Interactions",
     "Modpack"
 );
-generate_instance_test!(test_ftb_skyfactory_3, InstanceType::FTB, "FTB", "ftb", "SkyFactory3", "Modpack");
+generate_instance_test!(
+    test_ftb_skyfactory_3,
+    InstanceType::FTB,
+    "FTB",
+    "ftb",
+    "SkyFactory3",
+    "Modpack"
+);
 generate_instance_test!(
     test_ftb_infinity_evolved,
     InstanceType::FTB,
@@ -177,7 +331,14 @@ generate_instance_test!(
     "InfinityEvolved",
     "Modpack"
 );
-generate_instance_test!(test_ftb_stoneblock_2, InstanceType::FTB, "FTB", "ftb", "Stoneblock2", "Modpack");
+generate_instance_test!(
+    test_ftb_stoneblock_2,
+    InstanceType::FTB,
+    "FTB",
+    "ftb",
+    "Stoneblock2",
+    "Modpack"
+);
 
 // Tekkit Modpacks
 generate_instance_test!(
@@ -196,9 +357,30 @@ generate_instance_test!(
     "TekkitLegends",
     "Modpack"
 );
-generate_instance_test!(test_tekkit_lite, InstanceType::Tekkit, "Tekkit", "tekkit", "TekkitLite", "Modpack");
-generate_instance_test!(test_hexxit, InstanceType::Tekkit, "Tekkit", "tekkit", "Hexxit", "Modpack");
-generate_instance_test!(test_voltz, InstanceType::Tekkit, "Tekkit", "tekkit", "Voltz", "Modpack");
+generate_instance_test!(
+    test_tekkit_lite,
+    InstanceType::Tekkit,
+    "Tekkit",
+    "tekkit",
+    "TekkitLite",
+    "Modpack"
+);
+generate_instance_test!(
+    test_hexxit,
+    InstanceType::Tekkit,
+    "Tekkit",
+    "tekkit",
+    "Hexxit",
+    "Modpack"
+);
+generate_instance_test!(
+    test_voltz,
+    InstanceType::Tekkit,
+    "Tekkit",
+    "tekkit",
+    "Voltz",
+    "Modpack"
+);
 
 // CurseForge Modpacks
 generate_instance_test!(

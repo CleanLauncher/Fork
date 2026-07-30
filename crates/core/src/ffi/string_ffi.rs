@@ -4,7 +4,11 @@ use std::os::raw::c_char;
 use std::slice;
 
 #[no_mangle]
-pub extern "C" fn launcher_natural_compare(left_ptr: *const c_char, right_ptr: *const c_char, case_insensitive: bool) -> i32 {
+pub extern "C" fn launcher_natural_compare(
+    left_ptr: *const c_char,
+    right_ptr: *const c_char,
+    case_insensitive: bool,
+) -> i32 {
     if left_ptr.is_null() || right_ptr.is_null() {
         return 0;
     }
@@ -24,7 +28,12 @@ pub extern "C" fn launcher_natural_compare(left_ptr: *const c_char, right_ptr: *
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_human_readable_file_size(raw_byte_count: f64, use_si_units: bool, decimal_points: usize) -> *mut c_char {
-    let formatted_size = string_utils::human_readable_file_size(raw_byte_count, use_si_units, decimal_points);
+pub extern "C" fn launcher_human_readable_file_size(
+    raw_byte_count: f64,
+    use_si_units: bool,
+    decimal_points: usize,
+) -> *mut c_char {
+    let formatted_size =
+        string_utils::human_readable_file_size(raw_byte_count, use_si_units, decimal_points);
     ffi_cstring_to_raw!(formatted_size)
 }

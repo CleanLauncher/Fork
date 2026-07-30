@@ -4,7 +4,10 @@ use std::os::raw::c_char;
 use std::slice;
 
 #[no_mangle]
-pub extern "C" fn launcher_zip_entry_names(archive_path_ptr: *const c_char, out_count: *mut usize) -> *mut *mut c_char {
+pub extern "C" fn launcher_zip_entry_names(
+    archive_path_ptr: *const c_char,
+    out_count: *mut usize,
+) -> *mut *mut c_char {
     ffi_null_check!(archive_path_ptr, out_count);
     let archive_path = ffi_cstr_to_str!(archive_path_ptr);
     match archive::zip_entry_names(archive_path) {
@@ -14,7 +17,11 @@ pub extern "C" fn launcher_zip_entry_names(archive_path_ptr: *const c_char, out_
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_zip_read_entry(archive_path_ptr: *const c_char, entry_name_ptr: *const c_char, out_len: *mut usize) -> *mut u8 {
+pub extern "C" fn launcher_zip_read_entry(
+    archive_path_ptr: *const c_char,
+    entry_name_ptr: *const c_char,
+    out_len: *mut usize,
+) -> *mut u8 {
     ffi_null_check!(archive_path_ptr, entry_name_ptr, out_len);
     let archive_path = ffi_cstr_to_str!(archive_path_ptr);
     let entry_name = ffi_cstr_to_str!(entry_name_ptr);
@@ -59,7 +66,10 @@ pub extern "C" fn launcher_zip_extract_dir(
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_zip_entry_exists(archive_path_ptr: *const c_char, entry_name_ptr: *const c_char) -> bool {
+pub extern "C" fn launcher_zip_entry_exists(
+    archive_path_ptr: *const c_char,
+    entry_name_ptr: *const c_char,
+) -> bool {
     ffi_false_check!(archive_path_ptr, entry_name_ptr);
     let archive_path = ffi_cstr_to_str_false!(archive_path_ptr);
     let entry_name = ffi_cstr_to_str_false!(entry_name_ptr);
@@ -67,7 +77,10 @@ pub extern "C" fn launcher_zip_entry_exists(archive_path_ptr: *const c_char, ent
 }
 
 #[no_mangle]
-pub extern "C" fn launcher_tar_entry_names(archive_path_ptr: *const c_char, out_count: *mut usize) -> *mut *mut c_char {
+pub extern "C" fn launcher_tar_entry_names(
+    archive_path_ptr: *const c_char,
+    out_count: *mut usize,
+) -> *mut *mut c_char {
     ffi_null_check!(archive_path_ptr, out_count);
     let archive_path = ffi_cstr_to_str!(archive_path_ptr);
     match archive::tar_list_entries(archive_path) {

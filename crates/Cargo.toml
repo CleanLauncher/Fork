@@ -3,16 +3,22 @@ resolver = "2"
 members = [
     "error",
     "archive",
+    "auth",
+    "core",
+    "download_manager",
     "filesystem",
     "gzip",
     "hashing",
     "http_client",
+    "instance_manager",
     "json",
+    "launcher_api",
     "markdown",
+    "memory_profiler",
     "mod_metadata",
+    "process_launcher",
     "settings",
     "string_utils",
-    "core", "auth", "download_manager", "process_launcher", "memory_profiler"
 ]
 [profile.release]
 opt-level = 3

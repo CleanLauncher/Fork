@@ -1,12 +1,10 @@
 [package]
 name = "download_manager"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
-hex = "0.4.3"
-log = "0.4.33"
-reqwest = { version = "0.13.4", features = ["stream"] }
-serde = { version = "1.0.229", features = ["derive"] }
-sha2 = "0.11.0"
-tokio = { version = "1.53.1", features = ["full"] }
+error = { path = "../error" }
+hashing = { path = "../hashing" }
+http_client = { path = "../http_client" }
+serde = { version = "1", features = ["derive"] }

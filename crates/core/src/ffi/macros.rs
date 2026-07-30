@@ -1,6 +1,39 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::slice;
+
+macro_rules! ffi_check_ptr {
+    ($ptr:expr, $on_fail:expr) => {
+        if $ptr.is_null() {
+            return $on_fail;
+        }
+        unsafe { CStr::from_ptr($ptr) }
+    };
+}
+
+macro_rules! ffi_check_result {
+    ($result:expr, $on_ok:expr, $on_err:expr) => {
+        match $result {
+            Ok(val) => $on_ok(val),
+            Err(_) => $on_err,
+        }
+    };
+}
+
+macro_rules! ffi_result_string {
+    ($result:expr) => {{
+        match $result {
+            Ok(val) => {
+                let json = serde_json::to_string(&val).unwrap_or_default();
+                ffi_cstring_to_raw!(json)
+            }
+            Err(e) => {
+                let error_json = serde_json::json!({"error": e.to_string()});
+                ffi_cstring_to_raw!(error_json.to_string())
+            }
+        }
+    }};
+}
 macro_rules! ffi_null_check {
     ($($ptr:expr),+ $(,)?) => {
         if $($ptr.is_null())||+ {

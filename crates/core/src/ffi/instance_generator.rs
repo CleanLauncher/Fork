@@ -21,7 +21,11 @@ pub struct InstanceConfig {
     pub version_or_modpack: String,
 }
 
-pub fn create_instance(base_path: &Path, name: &str, config: InstanceConfig) -> Result<(), std::io::Error> {
+pub fn create_instance(
+    base_path: &Path,
+    name: &str,
+    config: InstanceConfig,
+) -> Result<(), std::io::Error> {
     let instance_dir = base_path.join(name);
     fs::create_dir_all(&instance_dir)?;
 
@@ -41,11 +45,18 @@ pub fn create_instance(base_path: &Path, name: &str, config: InstanceConfig) -> 
     };
 
     let key = match config.instance_type {
-        InstanceType::Vanilla | InstanceType::Forge | InstanceType::Fabric | InstanceType::Quilt | InstanceType::LiteLoader => "Version",
+        InstanceType::Vanilla
+        | InstanceType::Forge
+        | InstanceType::Fabric
+        | InstanceType::Quilt
+        | InstanceType::LiteLoader => "Version",
         _ => "Modpack",
     };
 
-    let config_content = format!("InstanceType={}\n{}={}\n", type_str, key, config.version_or_modpack);
+    let config_content = format!(
+        "InstanceType={}\n{}={}\n",
+        type_str, key, config.version_or_modpack
+    );
     fs::write(config_path, config_content)?;
 
     Ok(())

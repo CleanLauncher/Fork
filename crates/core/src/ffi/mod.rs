@@ -1,9 +1,12 @@
+pub mod api_ffi;
 pub mod archive_ffi;
+pub mod auth_ffi;
 pub mod download_ffi;
 pub mod fs_ffi;
 pub mod gzip_ffi;
 pub mod hash_ffi;
 pub mod http_ffi;
+pub mod instance_ffi;
 pub mod instance_generator;
 pub mod json_ffi;
 pub mod launcher_ffi;
