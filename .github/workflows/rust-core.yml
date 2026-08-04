@@ -152,7 +152,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.85.6
         with:
           tool: cargo-audit
 
@@ -217,7 +217,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-outdated
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.85.6
         with:
           tool: cargo-outdated
 
@@ -240,7 +240,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-udeps
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.85.6
         with:
           tool: cargo-udeps
 
